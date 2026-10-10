@@ -1,0 +1,120 @@
+{
+  "query": "repair action rollback after a failing verification",
+  "repo_root": ".",
+  "profile": "full",
+  "results": [
+    {
+      "rank": 1,
+      "score": 34.0391,
+      "file_path": "agent.py",
+      "start_line": 108,
+      "end_line": 173,
+      "focus_line": 154,
+      "snippet_start_line": 108,
+      "snippet_end_line": 173,
+      "symbol_start_line": 121,
+      "symbol_end_line": 164,
+      "language": "Python",
+      "kind": "method",
+      "symbol_id": "local/neathack-ci-agent:Python:agent.py:method:RepairRun.action",
+      "symbol_name": "action",
+      "qualified_name": "RepairRun.action",
+      "signature": "def action(self, name, arguments)",
+      "signals": [
+        "body",
+        "symbol-name",
+        "graph:callers",
+        "complete-symbol",
+        "contiguous-span"
+      ],
+      "snippet": "    def tests(self):\n        # Only this fresh, trusted arithmetic fixture is executable. No arbitrary repo commands.\n        environment = {name: value for name, value in os.environ.items() if name not in CONFIG_KEYS}\n        options = {'creationflags': subprocess.CREATE_NO_WINDOW} if os.name == 'nt' else {}\n        try:\n            process = subprocess.run([sys.executable, 'test_case.py'], cwd=self.workspace,\n                                     env=environment, capture_output=True, timeout=10, **options)\n            return {'exit_code': process.returncode, 'stdout': process.stdout.decode('utf8', errors='replace'),\n                    'stderr': process.stderr.decode('utf8', errors='replace')}\n        except subprocess.TimeoutExpired:\n            return {'exit_code': 124, 'stdout': '', 'stderr': 'Fixed fixture test exceeded its 10-second limit'}\n\n    @neatlogs.span(kind='TOOL', tool_name='repair_action', capture_input=False)\n    def action(self, name, arguments):\n        if not isinstance(arguments, dict):\n            raise ValueError('Tool arguments must be a JSON object')\n        source = self.workspace / SOURCE\n        if name == 'inspect':\n            if arguments:\n                raise ValueError('inspect takes no arguments')\n            return {'source': source.read_text(encoding='utf8'),\n                    'tests': (self.workspace / 'test_case.py').read_text(encoding='utf8')}\n        if name == 'replace_source':\n            if set(arguments) != {'path', 'content', 'reason'} or arguments['path'] != SOURCE:\n                raise ValueError('Only backoff.py can be replaced; path, content and reason are required')\n            if not isinstance(arguments['reason'], str) or len(arguments['reason']) > 2000:\n                raise ValueError('Provide a short repair reason')\n            validate_source(arguments['content'])\n            if self.state['rollback'] is None:\n                self.state['rollback'] = source.read_text(encoding='utf8')\n            temporary = source.with_suffix('.tmp')\n            temporary.write_text(arguments['content'], encoding='utf8')\n            os.replace(temporary, source)\n            self.state['verified_hash'] = None\n            return {'applied': True, 'sha256': digest(arguments['content']), 'reason': arguments['reason']}\n        if name == 'verify':\n            if arguments:\n                raise ValueError('verify takes no arguments')\n            result = self.tests()\n            if result['exit_code'] == 0:\n                self.state['verified_hash'] = digest(source.read_text(encoding='utf8'))\n                self.state['rollback'] = None\n            elif self.state['rollback'] is not None:\n                source.write_text(self.state['rollback'], encoding='utf8')\n                self.state['rollback'] = None\n                self.state['verified_hash'] = None\n                result['reverted_failed_candidate'] = True\n            return result\n        if name == 'finish':\n            if set(arguments) != {'summary'} or not isinstance(arguments['summary'], str):\n                raise ValueError('finish requires a string summary')\n            if self.state['verified_hash'] != digest(source.read_text(encoding='utf8')):\n                raise ValueError('A passing verification of the current source is required before finish')\n            self.state['status'] = 'verified'\n            self.state['summary'] = arguments['summary'][:2000]\n            return {'status': 'verified', 'summary': self.state['summary']}\n        raise ValueError('Unknown tool')\n\n    def execute(self, name, arguments):\n        started = time.monotonic()\n        try:\n            result = self.action(name, arguments)\n        except (ValueError, SyntaxError) as error:\n            result = {'error': str(error)}\n        self.event(name, result, time.monotonic() - started)\n        return result",
+      "merged_ranks": [
+        1,
+        2,
+        3
+      ]
+    }
+  ],
+  "verify_command": {
+    "command": "python -m py_compile agent.py",
+    "targets": "agent.py",
+    "derived_from": "build check only - no runnable test command derivable; this parses the file, it runs no tests",
+    "tier": "build-check"
+  },
+  "stats": {
+    "files_scanned": 14,
+    "preselection_backend": "inventory",
+    "preselection_passes": 1,
+    "preselection_files_examined": 14,
+    "files_content_read_during_preselection": 0,
+    "files_content_read_during_query": 14,
+    "bytes_content_read_during_query": 40376,
+    "files_indexed": 14,
+    "symbols_considered": 53,
+    "lexical_candidates": 43,
+    "graph_candidates": 14,
+    "caller_boosted_candidates": 24,
+    "identifier_usage_candidates": 11,
+    "same_container_neighbor_candidates": 2,
+    "same_file_bridge_candidates": 10,
+    "sparse_candidates": 0,
+    "sparse_files_content_read": 0,
+    "candidates_selected": 1,
+    "result_bytes": 4466,
+    "context_budget_bytes": 24576,
+    "complete_symbol_snippets": 1,
+    "merged_spans": 1,
+    "verify_command_bytes": 379,
+    "verify_tier": "build-check",
+    "context_block_bytes": 379,
+    "index_cache_hit": false,
+    "index_latency_ms": 308,
+    "query_latency_ms": 84,
+    "total_latency_ms": 499,
+    "search_latency_ms": 499,
+    "preselect_latency_ms": 107
+  },
+  "warnings": [
+    {
+      "code": "W_WORKTREE_SNAPSHOT",
+      "severity": "warning",
+      "effect_on_semantic_completeness": "snapshot records are read from the working tree because --worktree was requested"
+    }
+  ],
+  "partial_failures": [],
+  "completeness": {
+    "languages": {
+      "Git Ignore": {
+        "files": 1,
+        "symbols": 1
+      },
+      "JSON": {
+        "files": 1,
+        "symbols": 5
+      },
+      "Markdown": {
+        "files": 6,
+        "symbols": 24
+      },
+      "Pip Requirements": {
+        "files": 1,
+        "symbols": 1
+      },
+      "Python": {
+        "files": 4,
+        "symbols": 22
+      }
+    },
+    "relations": {
+      "CALLS": 107,
+      "CONFIGURES": 5,
+      "CONSTRUCTS": 1,
+      "CONTAINS": 12,
+      "DATA_FLOWS": 3,
+      "DEFINES": 53,
+      "HANDLES_TOOL": 3,
+      "IMPORTS": 32
+    }
+  },
+  "evidence_note": "Only the local absolute repository root was normalized; query results are unchanged."
+}

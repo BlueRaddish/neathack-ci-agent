@@ -1,0 +1,8 @@
+{
+  "entire_cli": "0.11.4",
+  "entire_graph": "0.4.0",
+  "neatlogs_sdk": "1.4.26",
+  "graph_semantic_capabilities": "Detected from the installed plugin before analysis; full receipt retained privately in setup workspace.",
+  "entire_release": "https://github.com/entireio/cli/releases/tag/v0.11.4",
+  "entire_graph_release": "https://github.com/entireio/entire-graph/releases/tag/v0.4.0"
+}

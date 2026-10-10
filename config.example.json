@@ -1,0 +1,7 @@
+{
+  "LITELLM_API_KEY": "",
+  "NEATLOGS_API_KEY": "",
+  "MODEL_BASE_URL": "https://litellm.vision.aivar.app/v1",
+  "MODEL_NAME": "claude-haiku",
+  "AGY_MODEL": "gemini-3.1-pro-high"
+}

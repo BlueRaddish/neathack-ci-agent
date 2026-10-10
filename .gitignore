@@ -1,0 +1,9 @@
+.venv/
+.tools/
+.runs/
+__pycache__/
+*.pyc
+config.private.json
+.env
+.entire/logs/
+.entire/sessions/

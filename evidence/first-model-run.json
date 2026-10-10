@@ -1,0 +1,31 @@
+{
+  "checked_utc": "2026-10-10T16:03:31.998288+00:00",
+  "mode": "real model inference via Antigravity",
+  "model": "gemini-3.1-pro-high",
+  "status": "verified",
+  "decisions": 4,
+  "baseline": {
+    "exit_code": 1,
+    "stdout": "FAIL retry_delay(5, 1, 30): expected 30, got 32\r\nFAIL retry_delay(10, 1, 30): expected 30, got 1024\r\nFAIL retry_delay(5, 2, 30): expected 30, got 64\r\nFAIL retry_delay(2, 1, 3): expected 3, got 4\r\nFAIL retry_delay(-1, 1, 30): expected ValueError\r\nFAIL retry_delay(0, 0, 30): expected ValueError\r\nFAIL retry_delay(0, 1, 0): expected ValueError\r\nFAIL retry_delay(0, -1, 30): expected ValueError\r\n4/12 fixture checks passed\r\n",
+    "stderr": ""
+  },
+  "final_verification": {
+    "exit_code": 0,
+    "stdout": "12/12 fixture checks passed\r\n",
+    "stderr": ""
+  },
+  "usage": {
+    "input_tokens": 51081,
+    "output_tokens": 6739,
+    "thinking_tokens": 6310,
+    "cache_read_tokens": 50303,
+    "total_tokens": 57820
+  },
+  "cost": "not reported by CLI",
+  "scope": "one fresh synthetic arithmetic fixture; no production-quality claim",
+  "neatlogs_dashboard_export": "not configured or verified",
+  "entire_graph_version": "0.4.0",
+  "entire_cli_version": "0.11.4",
+  "account_registration": "pending; no connected browser",
+  "cfo_ai_plan": "pending; no account, card required at signup"
+}

@@ -1,0 +1,3 @@
+PASS: baseline failure, no false completion, path/AST guards, failed-candidate rollback, immutable tests, recovery and persisted resume
+PASS: schema-only CLI finish accepted, environment tools/mismatched payload rejected, real SDK mock-HTTP tool-call contract
+2026-10-10 09:03:28 - neatlogs - INFO - Neatlogs SDK shutdown complete
