@@ -1,0 +1,318 @@
+<section id="sec-summary">
+  <p class="sec-label">01 / AUDIT SUMMARY &amp; CLAIMS</p>
+  <div class="col">
+    <p>This read-only evidence viewer presents authoritative execution receipts and runtime telemetry for <strong>ProofPatch</strong> across three synthetic Python arithmetic policy repairs evaluated under Claude Opus inference (<code>claude-opus-5-5-high</code>). All displayed metrics, source diffs, test contracts, and event streams derive directly from the recorded evaluation receipt.</p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="name">Case Policy</th>
+          <th>Source File</th>
+          <th>Baseline Fixtures</th>
+          <th>Repaired Fixtures</th>
+          <th>Injected CI Fault</th>
+          <th>Checkpoint Resume</th>
+          <th>Final Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="name">Exponential Backoff</td>
+          <td><code>backoff.py</code></td>
+          <td>4 / 13 passed</td>
+          <td>13 / 13 passed</td>
+          <td><span class="chip c-warn">exit 75</span></td>
+          <td>Step 2 (resumed)</td>
+          <td><span class="chip c-good">VERIFIED</span></td>
+        </tr>
+        <tr>
+          <td class="name">Pagination Cursor</td>
+          <td><code>pagination.py</code></td>
+          <td>6 / 22 passed</td>
+          <td>22 / 22 passed</td>
+          <td><span class="chip c-warn">exit 75</span></td>
+          <td>Step 2 (resumed)</td>
+          <td><span class="chip c-good">VERIFIED</span></td>
+        </tr>
+        <tr>
+          <td class="name">Budget Allocation</td>
+          <td><code>budget.py</code></td>
+          <td>7 / 22 passed</td>
+          <td>22 / 22 passed</td>
+          <td><span class="chip c-warn">exit 75</span></td>
+          <td>Step 2 (resumed)</td>
+          <td><span class="chip c-good">VERIFIED</span></td>
+        </tr>
+        <tr>
+          <td class="name"><strong>Cumulative Checks</strong></td>
+          <td><strong>3 policies</strong></td>
+          <td><strong>17 / 57 passed</strong></td>
+          <td><strong>57 / 57 passed</strong></td>
+          <td><strong>3 / 3 recovered</strong></td>
+          <td><strong>3 / 3 reloaded</strong></td>
+          <td><span class="chip c-good">100% REPAIRED</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col">
+    <div class="callout">
+      <span class="k">SCOPE DISCLOSURE</span>
+      These repairs evaluate three fresh synthetic arithmetic policies (backoff delay, pagination cursor, and budget balance). They are <strong>not a production CI benchmark</strong> or an arbitrary repository repair benchmark.
+    </div>
+
+    <div class="callout">
+      <span class="k">CONTROLLED FAULT INJECTION &amp; CHECKPOINT RESUME</span>
+      Each case experienced exactly one controlled transient CI worker outage (exit code 75) during step 3 candidate verification. This was <strong>not a model-authored bug</strong>; the harness rolled back the failed candidate and the agent safely re-applied it. Checkpoint reload at step 2 represents a fresh <code>RepairRun</code> instance instantiated from persisted state on disk, <strong>not an operating system process crash</strong>.
+    </div>
+
+    <div class="callout">
+      <span class="k">REVISION PROVENANCE &amp; COST ACCOUNTING</span>
+      The current reviewed repository revision is <code>ad2ac2fea21a62bf46152fff7ed734283e12c808</code> (<code>ad2ac2f</code>). Individual evaluation runs occurred during development; exact per-run source and immutable test SHA-256 digests are recorded per case. <strong>Not all runs occurred at revision ad2ac2f</strong>. Provider monetary cost was not reported by the CLI; token counts represent exact recorded observations.
+    </div>
+  </div>
+</section>
+
+<section id="sec-explorer">
+  <p class="sec-label">02 / POLICY REPAIR CASE EXPLORER</p>
+  <div class="col">
+    <p>Select a policy case below to inspect its execution lifecycle, recorded telemetry, before/after source code, immutable test fixtures, and stdout verification output.</p>
+
+    <div class="case-switcher" role="group" aria-label="Policy repair cases">
+      <button type="button" class="case-btn is-active" data-case="backoff" aria-pressed="true">backoff.py</button>
+      <button type="button" class="case-btn" data-case="pagination" aria-pressed="false">pagination.py</button>
+      <button type="button" class="case-btn" data-case="budget" aria-pressed="false">budget.py</button>
+    </div>
+  </div>
+
+  <div class="metric-grid" id="caseMetadataGrid">
+    <div class="metric-card">
+      <div class="label">Run ID</div>
+      <div class="value" id="metaRunId">20261011T130905Z-330e417c</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Elapsed Time &amp; Steps</div>
+      <div class="value"><span id="metaElapsed">46.46</span>s &bull; <span id="metaSteps">6</span> steps</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Rollbacks / Faults</div>
+      <div class="value"><span id="metaRollbacks">1</span> rollback (exit 75 injected)</div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Fixture Checks</div>
+      <div class="value"><span id="metaBaselineChecks">4/13</span> &rarr; <span id="metaFinalChecks">13/13</span></div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Repaired Source SHA-256</div>
+      <div class="value"><code id="metaSourceSha">f46cdb73ba08...</code></div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Immutable Test SHA-256</div>
+      <div class="value"><code id="metaTestSha">d5f67849dbe5...</code></div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Baseline Source SHA-256</div>
+      <div class="value"><code id="metaBaseSha">d3a9b93d9a16...</code></div>
+    </div>
+    <div class="metric-card">
+      <div class="label">Observed Tokens</div>
+      <div class="value" id="metaUsage">45,078 in &bull; 2,266 out &bull; 79,272 cache</div>
+    </div>
+  </div>
+
+  <div class="col">
+    <h3>Recorded Execution Events</h3>
+    <p>Events are rendered directly from authoritative receipt records. Use the filter controls to isolate fault recovery and checkpoint resumption milestones.</p>
+
+    <div class="filter-controls" role="group" aria-label="Event filters">
+      <button type="button" id="showAllBtn" class="filter-btn is-active" aria-pressed="true">Show all events</button>
+      <button type="button" id="filterRecoveryBtn" class="filter-btn" aria-pressed="false">Recovery events only</button>
+    </div>
+
+    <div id="emptyFilterNotice" class="empty-notice" hidden></div>
+  </div>
+
+  <div id="eventsList" class="events-list"></div>
+
+  <div class="col" style="margin-top: 36px;">
+    <h3>Source Code &amp; Test Contract Verification</h3>
+    <p>Candidate code was verified by independent execution against immutable test fixture contracts that were never edited by the model.</p>
+  </div>
+
+  <div class="code-split">
+    <div class="code-box">
+      <div class="code-box-header">
+        <span>Baseline Source (Faulty)</span>
+        <span id="labelBaselineSha">Original</span>
+      </div>
+      <pre><code id="baselineSourceCode"></code></pre>
+    </div>
+    <div class="code-box">
+      <div class="code-box-header">
+        <span>Repaired Source (Verified)</span>
+        <span id="labelRepairedSha">Patched</span>
+      </div>
+      <pre><code id="repairedSourceCode"></code></pre>
+    </div>
+  </div>
+
+  <div class="code-split">
+    <div class="code-box">
+      <div class="code-box-header">
+        <span>Immutable Test Contract: test_case.py (Unmodified)</span>
+        <span id="labelTestSha">Fixed Fixture</span>
+      </div>
+      <pre><code id="testContractCode"></code></pre>
+    </div>
+    <div class="code-box">
+      <div class="code-box-header">
+        <span>Execution Stdout (Baseline vs Final)</span>
+        <span>Fixture Results</span>
+      </div>
+      <pre><strong>Baseline Stdout:</strong><br><code id="baselineStdout"></code><br><br><strong>Final Verification Stdout:</strong><br><code id="finalStdout"></code></pre>
+    </div>
+  </div>
+</section>
+
+<section id="sec-history">
+  <p class="sec-label">03 / RUN HISTORY &amp; TEST CORRECTION</p>
+  <div class="col">
+    <p>Full transparency of the development cycle: prior failed attempts and fixture contract updates are disclosed below without omission.</p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="name">Receipt Name</th>
+          <th>Time (UTC)</th>
+          <th>Cases Evaluated</th>
+          <th>Recorded Status</th>
+          <th>Audit Note / Digest</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="name">evaluation-initial-attempt.json</td>
+          <td>2026-10-11 12:57:37</td>
+          <td>backoff, pagination, budget</td>
+          <td><span class="chip c-stop">JSONDecodeError</span></td>
+          <td>Three Gemini runs returned empty partial CLI responses; parsing the structured response failed.</td>
+        </tr>
+        <tr>
+          <td class="name">evaluation-second-attempt.json</td>
+          <td>2026-10-11 13:04:16</td>
+          <td>backoff, pagination</td>
+          <td><span class="chip c-good">verified</span> (both)</td>
+          <td>backoff: 6 steps (test sha <code>39e728e0...</code>); pagination: 6 steps (test sha <code>55e0343b...</code>).</td>
+        </tr>
+        <tr>
+          <td class="name">evaluation-budget-attempt.json</td>
+          <td>2026-10-11 13:06:05</td>
+          <td>budget</td>
+          <td><span class="chip c-good">verified</span></td>
+          <td>budget: 6 steps (test sha <code>cca48789...</code>). 22/22 fixture checks passed.</td>
+        </tr>
+        <tr>
+          <td class="name">evaluation-backoff-strengthened.json</td>
+          <td>2026-10-11 13:09:05</td>
+          <td>backoff</td>
+          <td><span class="chip c-good">verified</span></td>
+          <td>Strengthened contract (13 checks, test sha <code>d5f67849...</code>). Prior 12-check attempt retained.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col">
+    <div class="callout">
+      <span class="k">CONTRACT CORRECTION DISCLOSURE (12 &rarr; 13 CHECKS)</span>
+      A fresh reviewer caught missing negative-cap coverage in <code>backoff.py</code>. The backoff contract was strengthened from 12 to 13 checks and rerun; previous evidence was retained with its original test digest (<code>39e728e0...</code>). Older fixture revision: <code>2473e5f</code>. Usage resets used: 0.
+    </div>
+  </div>
+</section>
+
+<section id="sec-audit">
+  <p class="sec-label">04 / ECOSYSTEM DELIVERABLES &amp; PENDING QA</p>
+  <div class="col">
+    <p>Honest status accounting of third-party platform integrations, partner deliverables, and QA requirements:</p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="name">Deliverable / Component</th>
+          <th>Requirement</th>
+          <th>Current Status</th>
+          <th>Notes &amp; Limitations</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="name">neatlogs SDK</td>
+          <td>Telemetry SDK Integration</td>
+          <td><span class="chip c-good">DOCTOR PASSED</span></td>
+          <td>Local SDK Doctor passed; remote dashboard export pending (<code>neatlogs_export_configured: false</code>).</td>
+        </tr>
+        <tr>
+          <td class="name">Entire Graph</td>
+          <td>Graph Exploration</td>
+          <td><span class="chip c-warn">DEV ONLY</span></td>
+          <td>Used during development; graph is not a runtime/checkpoint claim.</td>
+        </tr>
+        <tr>
+          <td class="name">cfo.ai Audit</td>
+          <td>Cost &amp; Financial Audit</td>
+          <td><span class="chip c-warn">OUTPUT PENDING</span></td>
+          <td>Provider CLI did not report monetary cost; token counts reported directly from raw receipts.</td>
+        </tr>
+        <tr>
+          <td class="name">Luma Hackathon Registration</td>
+          <td>Contest Registration</td>
+          <td><span class="chip c-stop">APPROVAL PENDING</span></td>
+          <td>Luma registration closed; organizer request sent, approval pending. No entry submitted.</td>
+        </tr>
+        <tr>
+          <td class="name">Partner Demo &amp; Check-in</td>
+          <td>Required Deliverable</td>
+          <td><span class="chip c-stop">PENDING</span></td>
+          <td>Partner demo, check-in, and official X quote-post pending.</td>
+        </tr>
+        <tr>
+          <td class="name">Recorded Video Preview</td>
+          <td>Demo Asset</td>
+          <td><span class="chip c-warn">DRAFT PREVIEW</span></td>
+          <td>Draft video: 160-second static captioned replay of recorded events, not live screen recording or final eligible partner demo.</td>
+        </tr>
+        <tr>
+          <td class="name">Browser Interaction QA</td>
+          <td>Running interaction checks</td>
+          <td><span class="chip c-warn">PENDING</span></td>
+          <td>Supported browser access unavailable in development environment. Static checks are not browser QA.</td>
+        </tr>
+        <tr>
+          <td class="name">GitHub Actions CI</td>
+          <td>Repository CI Matrix</td>
+          <td><span class="chip c-good">CI PASSED</span></td>
+          <td>CI passed on Python 3.10 and 3.13 at public revision <code>bb90500</code> (Run #38142359850).</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col">
+    <h3>Authoritative Evidence Sources &amp; Public Links</h3>
+    <ul>
+      <li><a href="https://github.com/BlueRaddish/neathack-ci-agent" target="_blank" rel="noopener">BlueRaddish/neathack-ci-agent GitHub Repository</a></li>
+      <li><a href="https://github.com/BlueRaddish/neathack-ci-agent/blob/main/evidence/evaluation.json" target="_blank" rel="noopener">evaluation.json (Raw Evaluation Receipt)</a></li>
+      <li><a href="https://github.com/BlueRaddish/neathack-ci-agent/blob/main/evidence/entire-recovery-impact.json" target="_blank" rel="noopener">entire-recovery-impact.json (Recovery Analysis)</a></li>
+      <li><a href="https://github.com/BlueRaddish/neathack-ci-agent/actions/runs/38142359850" target="_blank" rel="noopener">GitHub Actions Run 38142359850 (Python 3.10/3.13 passed at bb90500)</a></li>
+      <li><a href="https://github.com/BlueRaddish/neathack-ci-agent/releases/tag/proofpatch-dev-20261011" target="_blank" rel="noopener">ProofPatch Release tag: proofpatch-dev-20261011</a></li>
+      <li><a href="https://neatlogs.com/hackathon" target="_blank" rel="noopener">Neatlogs Hackathon Portal</a></li>
+    </ul>
+  </div>
+</section>

@@ -1,0 +1,14 @@
+{
+  "artifact": "docs",
+  "evidence": "evidence/evaluation.json",
+  "status": "passed",
+  "checks": 95,
+  "failures": [],
+  "scope": "Static receipt-data and source-convention assertions only; no browser, interaction, visual or accessibility QA claim.",
+  "source_sha256": {
+    "extra.js": "37450370f5f32d90a8b88d6b0a65cd3d8a400d9f4080b4ec3f741f081bf8e006",
+    "body.html": "aad290f9b1c9d77b189c1b2bb9830ded59971db17d996775c620f37dc61b10a6",
+    "index.html": "548fbf39dc26016dd3e6c77c3095172499d13127a6b025ce9ec5c5b9065d1a4d"
+  },
+  "packaging": "Gemini-authored components; LF line endings normalized before validation"
+}

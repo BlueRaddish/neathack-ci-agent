@@ -104,6 +104,14 @@ partner dashboards and cfo.ai output still need to appear in the final demo.
 The [publication receipt](evidence/publication.json) records CI results and a
 downloaded-video hash check against the local encode and GitHub asset digest.
 
+The [read-only evidence viewer](https://blueraddish.github.io/neathack-ci-agent/)
+shows each case, unchanged contracts and exact recorded event JSON. Its
+[95 static checks](evidence/viewer-static.json) verify data fidelity and source
+conventions. Running browser, keyboard, touch and layout checks remain pending.
+With Node installed, rerun the data check using
+`python submission/validate_viewer.py docs`. The [portable HTML](docs/index.html)
+also works locally.
+
 | Required partner or step | Verified status |
 |---|---|
 | neatlogs | SDK 1.4.26 local Doctor passed; remote workflow export/readback pending |
