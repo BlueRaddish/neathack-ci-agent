@@ -1,9 +1,9 @@
 # neatHack build log
 
-Project: CI recovery agent — inspect a failing trusted fixture, propose a repair,
+Project: ProofPatch — inspect a failing trusted fixture, propose a repair,
 handle failed actions, and retain independent before/after verification.
 
-Team: solo development assumed; no name or handle chosen for publication.
+Team: BlueRaddish (solo).
 
 Stack: Python 3.13, official neatlogs Python SDK with OpenAI integration, event
 LiteLLM gateway configured, local Entire CLI. Live accounts and partner evidence
@@ -25,7 +25,8 @@ appended below after verification. A scripted replay is not a live model result.
 - [ ] neatlogs: authenticated project, real exported before/after traces, readback/link
 - [x] Entire: versioned Graph search used to inspect repair/rollback behavior; evidence/entire-graph-search.json
 - [ ] cfo.ai: actual pricing/cost/revenue/runway plan generated in cfo.ai and exported
-- [ ] Live model: event key acquired privately, real tool-calling repair run verified
+- [x] Real model inference: signed-in AGY runs with published verification receipts
+- [ ] Event gateway: registered-team key acquired privately and gateway run verified
 
 ## Submission
 
@@ -37,7 +38,7 @@ This corrects treating the planned close as a fully confirmed final deadline.
 
 - [ ] Luma registration and web check-in; confirm solo/team details
 - [ ] Join/read official Discord and confirm final cutoff
-- [ ] Evidence of before/after improvement and failure recovery
+- [x] Before/after and controlled failure recovery: evidence/evaluation.json
 - [x] Public repository with event-dated commits and supporting evidence
 - [ ] Public build updates tagged #neatHack
 - [ ] Demo video, at most three minutes, explicitly covering all three partners
@@ -45,7 +46,7 @@ This corrects treating the planned close as a fully confirmed final deadline.
 - [ ] Actual submission receipt retained
 
 cfo.ai signup currently requires a card and instructs immediate cancellation of
-the subscription; this step needs user participation. Preparing a local business
+the subscription; authenticated browser access remains unavailable. Preparing a local business
 outline does not count as using cfo.ai. No registration, post or submission has
 been made by this setup.
 
@@ -118,7 +119,7 @@ verification callers and data flow. Remote neatlogs traces and actual cfo.ai
 output remain missing; prepared business inputs do not replace them.
 
 Live Luma registration is closed. The registered-email check-in form remains
-available, but no booking exists. An authorized support-routing request was sent
+available, but no booking has been verified. An authorized support-routing request was sent
 to the address published in neatlogs' terms, with SMTP acceptance and the shared
 mailbox Sent receipt verified. It requests organizer-approved late registration;
 it does not grant eligibility or submit an entry. No reply has been verified yet.
@@ -127,4 +128,4 @@ Both supported browser inventories are empty, the in-app browser is unavailable,
 and the Windows native computer-use pipe cannot connect. No password or browser
 cookie extraction, new account, CFO card or subscription action has occurred.
 The official quote-post target is not live yet; submission opens October 12 at
-6:30 AM PDT and remains pending, with final close confirmed through Discord.
+6:30 AM PDT and remains pending; final close must be checked in official Discord.

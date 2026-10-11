@@ -31,6 +31,7 @@ loaded automatically; a different case is rejected.
 The installed, signed-in Antigravity CLI can supply structured model decisions:
 
 ```powershell
+$env:AGY_MODEL = 'claude-opus-5-5-high'
 .venv/Scripts/python.exe -B agent.py --mode agy --case budget
 .venv/Scripts/python.exe -B evaluate.py --mode agy --worker-fault --interrupt-after 2
 ```
@@ -56,7 +57,7 @@ Git-ignored `config.private.json`. Configure keys privately:
 - `MODEL_BASE_URL`: organizer gateway already configured.
 
 Environment variables take precedence; the app does not load `.env` files.
-Then run `agent.py --mode live --case backoff`. Local telemetry spans alone do
+Then run `.venv/Scripts/python.exe -B agent.py --mode live --case backoff`. Local telemetry spans alone do
 not prove exported dashboard traces. See the [event access page](https://neatlogs.com/hackathon/models).
 
 ## Verification that survives a bad patch
@@ -95,6 +96,14 @@ from 12 to 13 checks after independent review; the historical run remains intact
 callers and data flow. The pending partners and eligibility gates below remain
 unchanged by these local results.
 
+[GitHub CI passed](https://github.com/BlueRaddish/neathack-ci-agent/actions/runs/38142359850)
+on Python 3.10 and 3.13 at revision `bb90500`.
+The [160-second draft walkthrough](https://github.com/BlueRaddish/neathack-ci-agent/releases/tag/proofpatch-dev-20261011)
+uses captioned cards to replay actual recorded events. It is a draft; required
+partner dashboards and cfo.ai output still need to appear in the final demo.
+The [publication receipt](evidence/publication.json) records CI results and a
+downloaded-video hash check against the local encode and GitHub asset digest.
+
 | Required partner or step | Verified status |
 |---|---|
 | neatlogs | SDK 1.4.26 local Doctor passed; remote workflow export/readback pending |
@@ -107,6 +116,6 @@ unchanged by these local results.
 The supported browser inventory is empty and the native computer-use pipe is
 unavailable in this session. No account or subscription action is claimed.
 The published submission window opens October 12 at 6:30 AM PDT, with a planned
-11:25 AM close; the final cutoff is confirmed on Discord. [Official rules](https://neatlogs.com/hackathon)
+11:25 AM close; the final cutoff must be checked in official Discord. [Official rules](https://neatlogs.com/hackathon)
 
 See [build log and checklist](hackathon.md) and the [viewer behavior contract](design.md).

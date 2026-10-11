@@ -1,0 +1,51 @@
+{
+  "time_utc": "2026-10-11T13:39:23.279338+00:00",
+  "ci": {
+    "id": 38142359850,
+    "head_sha": "bb905004e3391f0d177355e157069f9e1b8d1b39",
+    "status": "completed",
+    "conclusion": "success",
+    "html_url": "https://github.com/BlueRaddish/neathack-ci-agent/actions/runs/38142359850"
+  },
+  "ci_jobs": [
+    {
+      "id": 114478646832,
+      "name": "check (3.10)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/BlueRaddish/neathack-ci-agent/actions/runs/38142359850/job/114478646832"
+    },
+    {
+      "id": 114478647012,
+      "name": "check (3.13)",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/BlueRaddish/neathack-ci-agent/actions/runs/38142359850/job/114478647012"
+    }
+  ],
+  "release": {
+    "id": 409682955,
+    "tag_name": "proofpatch-dev-20261011",
+    "prerelease": true,
+    "draft": false,
+    "html_url": "https://github.com/BlueRaddish/neathack-ci-agent/releases/tag/proofpatch-dev-20261011"
+  },
+  "assets": [
+    {
+      "id": 630807310,
+      "name": "proofpatch-draft.mp4",
+      "size": 1438962,
+      "digest": "sha256:6512506abfaa01bca080c66421c4b39f240396088f65dc8cb4d0785a7c047519",
+      "browser_download_url": "https://github.com/BlueRaddish/neathack-ci-agent/releases/download/proofpatch-dev-20261011/proofpatch-draft.mp4"
+    },
+    {
+      "id": 630807311,
+      "name": "video-receipt.json",
+      "size": 438,
+      "digest": "sha256:a8c6c90479db073815ffe01f02075decfa92cc526b82c5c842546468c92785d9",
+      "browser_download_url": "https://github.com/BlueRaddish/neathack-ci-agent/releases/download/proofpatch-dev-20261011/video-receipt.json"
+    }
+  ],
+  "verification": "Downloaded assets match local SHA-256 and GitHub digest/size",
+  "contest_status": "Draft development evidence; not an eligible final entry or submission"
+}

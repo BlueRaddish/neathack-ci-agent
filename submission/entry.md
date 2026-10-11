@@ -13,6 +13,13 @@ neatlogs dashboard traces, Entire evidence and an actual cfo.ai plan. A local
 SDK diagnostic, draft replay video or prepared business-plan input does not
 satisfy those requirements.
 
+Verified results: real Opus inference improved 17/57 to 57/57 unchanged fixture
+checks across three synthetic policies. Each run recovered from one controlled
+worker outage and deliberately reloaded a checkpoint. Python 3.10 and 3.13
+[CI passed](https://github.com/BlueRaddish/neathack-ci-agent/actions/runs/38142359850).
+The [160-second captioned draft](https://github.com/BlueRaddish/neathack-ci-agent/releases/tag/proofpatch-dev-20261011)
+replays recorded events; it is not the final partner demo.
+
 ## Proposed build update
 
 Building ProofPatch at #neatHack: scoped policy repairs with immutable tests,
@@ -24,6 +31,14 @@ This text has not been posted to X. Choose the final verified numbers and demo
 URL only after their receipts exist. The final public quote post must attach to
 the organizer's actual submission post during the approved window.
 
+## Proposed résumé wording
+
+Built ProofPatch, an AI repair prototype with immutable test contracts, durable
+rollback and checkpoint recovery; improved 17/57 to 57/57 checks across three
+synthetic policies through real model inference, with Python 3.10/3.13 CI.
+
+No hackathon participation, submission, award or production impact is claimed.
+
 ## Eligibility and access gates
 
 - Luma registration closed on October 11; support-routing request sent from the
@@ -31,7 +46,7 @@ the organizer's actual submission post during the approved window.
 - neatlogs project key, workflow dashboard readback and cfo.ai output unavailable.
 - Browser inventory empty; in-app browser unavailable; native helper pipe absent.
 - Submission opens October 12 at 6:30 AM PDT. Planned close 11:25 AM; final cutoff
-  is announced on official Discord. Opening a draft is not submission.
+  must be checked in official Discord. Opening a draft is not submission.
 
 Primary sources: [rules](https://neatlogs.com/hackathon),
 [registration](https://luma.com/s5blr882),
