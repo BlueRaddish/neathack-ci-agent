@@ -72,6 +72,13 @@ try:
             assert result['exit_code'] == 1 and result['reverted_failed_candidate']
             assert source_path.read_text() == agent.CORRECT_SOURCE
 
+            # A negative-cap semantic mutant previously passed the visible suite.
+            cached.action('replace_source', {'path': agent.SOURCE,
+                'content': agent.CORRECT_SOURCE.replace('cap <= 0', 'cap == 0'), 'reason': 'Negative-cap mutant'})
+            result = cached.action('verify', {})
+            assert result['exit_code'] == 1 and result['reverted_failed_candidate']
+            assert 'retry_delay(0, 1, -1)' in result['stdout']
+
             drift = agent.RepairRun('replay')
             assert drift.run(12)['status'] == 'verified'
             (drift.workspace / agent.SOURCE).write_text('def retry_delay(attempt, base=1, cap=30):\n    return 0\n')

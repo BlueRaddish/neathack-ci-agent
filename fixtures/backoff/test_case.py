@@ -8,7 +8,8 @@ for attempt, base, cap, expected in cases:
     actual = retry_delay(attempt, base, cap)
     if actual != expected:
         failures.append(f'retry_delay({attempt}, {base}, {cap}): expected {expected}, got {actual}')
-for args in [(-1, 1, 30), (0, 0, 30), (0, 1, 0), (0, -1, 30)]:
+invalid = [(-1, 1, 30), (0, 0, 30), (0, 1, 0), (0, -1, 30), (0, 1, -1)]
+for args in invalid:
     try:
         retry_delay(*args)
     except ValueError:
@@ -17,5 +18,6 @@ for args in [(-1, 1, 30), (0, 0, 30), (0, 1, 0), (0, -1, 30)]:
         failures.append(f'retry_delay{args}: expected ValueError')
 for failure in failures:
     print('FAIL ' + failure)
-print(f'{12 - len(failures)}/12 fixture checks passed')
+count = len(cases) + len(invalid)
+print(f'{count - len(failures)}/{count} fixture checks passed')
 raise SystemExit(bool(failures))

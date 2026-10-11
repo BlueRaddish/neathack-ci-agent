@@ -295,6 +295,7 @@ class RepairRun:
                              'conversation': self.state['messages'], 'available_actions': TOOLS})
         message = json.dumps({'event': 'user', 'message': {'content': prompt}}) + '\n'
         model = os.getenv('AGY_MODEL', 'gemini-3.1-pro-high')
+        attempt_id = uuid4().hex[:8]
         command = [executable, '--model', model, '--input-format', 'stream-json', '--output-format', 'stream-json',
                    '--mode', 'plan', '--json-schema', str(schema_path), '--disable-slash-commands', '--print-timeout', '90s']
         options = {'creationflags': subprocess.CREATE_NO_WINDOW} if os.name == 'nt' else {}
@@ -305,8 +306,8 @@ class RepairRun:
             with tempfile.TemporaryDirectory(prefix='proofpatch-inference-') as isolated_context:
                 process = subprocess.run(command, input=message, text=True, encoding='utf8', capture_output=True,
                                          cwd=isolated_context, timeout=105, **options)
-            (provider / f'decision-{self.state["step"]}.ndjson').write_text(process.stdout, encoding='utf8')
-            (provider / f'decision-{self.state["step"]}.stderr').write_text(process.stderr, encoding='utf8')
+            (provider / f'decision-{self.state["step"]}-{attempt_id}.ndjson').write_text(process.stdout, encoding='utf8')
+            (provider / f'decision-{self.state["step"]}-{attempt_id}.stderr').write_text(process.stderr, encoding='utf8')
             events = [json.loads(line) for line in process.stdout.splitlines() if line.strip()]
             results = [e['result'] for e in events if e.get('event') == 'result']
             if process.returncode or len(results) != 1 or results[0].get('status') != 'SUCCESS':
@@ -332,7 +333,8 @@ class RepairRun:
             span.set_attribute('input.value', prompt)
             span.set_attribute('output.value', json.dumps(action))
             self.event('model_decision', {'provider': 'Antigravity', 'model': model, 'action': action,
-                       'usage': usage, 'duration_seconds': result.get('duration_seconds'), 'cost': 'not reported'}, 0)
+                       'usage': usage, 'duration_seconds': result.get('duration_seconds'), 'cost': 'not reported',
+                       'provider_receipt': f'provider/decision-{self.state["step"]}-{attempt_id}.ndjson'}, 0)
             return action
 
     @neatlogs.span(kind='WORKFLOW', name='ci-repair', capture_input=False, capture_output=False)
@@ -380,14 +382,23 @@ class RepairRun:
                     break
         elif self.state['mode'] == 'agy':
             while self.state['step'] < max_steps and self.state['status'] != 'verified':
-                action = self.choose_agy()
+                try:
+                    action = self.choose_agy()
+                except (TimeoutError, subprocess.TimeoutExpired) as error:
+                    failures = self.state.get('provider_timeouts', 0) + 1
+                    self.state['provider_timeouts'] = failures
+                    self.event('provider_timeout', {'error_type': type(error).__name__, 'attempt': failures,
+                               'retrying': failures <= 2, 'limit': 'At most two timeout retries per run'}, 0)
+                    if failures > 2:
+                        raise
+                    continue
                 self.state['step'] += 1
                 result = self.execute(action['name'], action['arguments'])
                 self.save()
         else:
             from openai import OpenAI
             client = neatlogs.wrap(OpenAI(api_key=os.environ['LITELLM_API_KEY'],
-                base_url=os.getenv('MODEL_BASE_URL', 'https://litellm.vision.aivar.app/v1'), max_retries=0, timeout=60))
+                base_url=os.getenv('MODEL_BASE_URL', 'https://litellm.vision.aivar.app/v1'), max_retries=2, timeout=60))
             while self.state['step'] < max_steps and self.state['status'] != 'verified':
                 response = client.chat.completions.create(model=os.getenv('MODEL_NAME', 'claude-haiku'),
                     messages=self.state['messages'], tools=TOOLS, parallel_tool_calls=False, max_tokens=2000)

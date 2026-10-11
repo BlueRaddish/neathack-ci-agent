@@ -94,7 +94,9 @@ def main():
                 run.state['error_type'] = type(error).__name__
                 run.save()
                 result = {'case': case, 'status': 'error', 'run_id': run.directory.name,
-                          'error_type': type(error).__name__, 'elapsed_seconds': round(time.monotonic() - started, 2)}
+                          'error_type': type(error).__name__, 'elapsed_seconds': round(time.monotonic() - started, 2),
+                          'steps': run.state['step'], 'baseline': run.state.get('baseline'),
+                          'test_sha256': run.state['test_sha256']}
                 # Error details stay in the private run; public output retains the failed case.
             receipt['results'].append(result)
             agent.write_json(args.output, receipt)
