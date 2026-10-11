@@ -38,7 +38,7 @@ This corrects treating the planned close as a fully confirmed final deadline.
 - [ ] Luma registration and web check-in; confirm solo/team details
 - [ ] Join/read official Discord and confirm final cutoff
 - [ ] Evidence of before/after improvement and failure recovery
-- [ ] Public repository with event-dated commits and supporting evidence
+- [x] Public repository with event-dated commits and supporting evidence
 - [ ] Public build updates tagged #neatHack
 - [ ] Demo video, at most three minutes, explicitly covering all three partners
 - [ ] Public quote post attached to the official submission post on X during window
@@ -80,3 +80,51 @@ official neatlogs CLI sign-in still requires browser approval, and cfo.ai MCP
 requires an existing account/OAuth authorization. No account was created and no
 card or subscription action was taken. Registration, credits, partner dashboard
 traces and the actual cfo.ai plan remain outstanding.
+
+## 2026-10-11 — ProofPatch feedback and verified recovery
+
+The user authorized autonomous improvement, independent reviews and final
+submission using this computer's logged-in accounts, with at most one usage
+reset. No reset has been used. Current product name: ProofPatch; public repository
+and PARA project slug stay neathack-ci-agent.
+
+Fresh code review reproduced stale-bytecode false greens, altered default
+parameters passing visible tests, source drift on completed-run resume, trust
+checks missing during verification, and interrupted-action observation gaps.
+The verifier now compiles an exact source snapshot in a fresh process, enforces
+the contracted signature/defaults, checks immutable tests each time, rechecks
+completed runs and restores interrupted mutations with matching observations.
+Bounded provider timeout retries retain separate raw attempt files.
+
+Two new independent synthetic fixtures add pagination and budget policies. Real
+Opus 5.5 High runs completed all three cases in six decisions each, including
+one explicitly injected worker outage/rollback and an intentional checkpoint
+reload. The strengthened suite improved **17/57 to 57/57** unchanged checks;
+[raw receipts](evidence/evaluation.json) and [summary](evidence/evaluation.md).
+This proves recovery from the controlled failure, not a model-authored defect,
+an actual killed process, a production benchmark or arbitrary-repository repair.
+
+A second reviewer found negative-cap coverage missing from backoff; the semantic
+mutant is now rejected by a runnable regression, and backoff was rerun with 13
+checks. Every earlier evaluation remains available, including three unsuccessful
+Gemini provider runs that returned empty partial outputs. Inference was then
+tested from an empty temporary context with an already verified usable model.
+Changing both context and model does not isolate which caused the initial stall.
+
+Independent Opus and Muse judge reviews are retained under evidence/. Their
+pending-publication inference came from stale prose and is explicitly corrected;
+the public repository already existed. Real Entire Graph impact output identifies
+verification callers and data flow. Remote neatlogs traces and actual cfo.ai
+output remain missing; prepared business inputs do not replace them.
+
+Live Luma registration is closed. The registered-email check-in form remains
+available, but no booking exists. An authorized support-routing request was sent
+to the address published in neatlogs' terms, with SMTP acceptance and the shared
+mailbox Sent receipt verified. It requests organizer-approved late registration;
+it does not grant eligibility or submit an entry. No reply has been verified yet.
+
+Both supported browser inventories are empty, the in-app browser is unavailable,
+and the Windows native computer-use pipe cannot connect. No password or browser
+cookie extraction, new account, CFO card or subscription action has occurred.
+The official quote-post target is not live yet; submission opens October 12 at
+6:30 AM PDT and remains pending, with final close confirmed through Discord.

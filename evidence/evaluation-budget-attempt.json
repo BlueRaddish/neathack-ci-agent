@@ -1,0 +1,313 @@
+{
+  "time_utc": "2026-10-11T13:06:05.065031+00:00",
+  "scope": "Fresh synthetic arithmetic policies; not a benchmark or arbitrary repository repair",
+  "fault_label": "Controlled transient CI worker outage",
+  "neatlogs_export_configured": false,
+  "results": [
+    {
+      "case": "budget",
+      "mode": "agy",
+      "run_id": "20261011T130605Z-67d179ba",
+      "status": "verified",
+      "steps": 6,
+      "elapsed_seconds": 56.01,
+      "baseline": {
+        "exit_code": 1,
+        "stdout": "FAIL available_budget(100, 25, 10) {}: AssertionError: expected 65, got 75\nFAIL available_budget(100, 0, 100) {}: AssertionError: expected 0, got 100\nFAIL available_budget(100, 101, 0) {}: AssertionError: expected 0, got -1\nFAIL available_budget(100, 50, 51) {}: AssertionError: expected 0, got 50\nFAIL available_budget(1, 0, 1) {}: AssertionError: expected 0, got 1\nFAIL available_budget(10, 3, 2) {}: AssertionError: expected 5, got 7\nFAIL available_budget(10,) {'reserved': 4}: AssertionError: expected 6, got 10\nFAIL available_budget(10,) {'spent': 3, 'reserved': 2}: AssertionError: expected 5, got 7\nFAIL available_budget(1000000, 123456, 123456) {}: AssertionError: expected 753088, got 876544\nFAIL available_budget(-1,) {}: expected ValueError\nFAIL available_budget(0, -1) {}: expected ValueError\nFAIL available_budget(0, 0, -1) {}: expected ValueError\nFAIL available_budget(-1, -1, -1) {}: expected ValueError\nFAIL available_budget(1, 2, -1) {}: expected ValueError\nFAIL available_budget(1, -1, 2) {}: expected ValueError\n7/22 fixture checks passed\n",
+        "stderr": "",
+        "source_sha256": "d97c9c94e2245b0777431323310b7e995746ed3a1e1a2e0155ce816af64785f7"
+      },
+      "final_verification": {
+        "exit_code": 0,
+        "stdout": "22/22 fixture checks passed\n",
+        "stderr": "",
+        "source_sha256": "0f5f7e84a7d94d9373a8820c0232ae68ae9f0c99d035243008c5a9a30191652c"
+      },
+      "source_sha256": "0f5f7e84a7d94d9373a8820c0232ae68ae9f0c99d035243008c5a9a30191652c",
+      "test_sha256": "cca48789de68463852b1fe3ea5dbac6f80c15c9b7408e891f9a91d6b325e0d6f",
+      "rollbacks": 1,
+      "tool_errors": 0,
+      "intentional_interruption": true,
+      "controlled_worker_fault": true,
+      "model": "claude-opus-5-5-high",
+      "usage": {
+        "input_tokens": 49678,
+        "output_tokens": 2343,
+        "thinking_tokens": 0,
+        "cache_read_tokens": 79272,
+        "total_tokens": 52021
+      },
+      "cost": "Provider CLI did not report monetary cost",
+      "events": [
+        {
+          "time_utc": "2026-10-11T13:06:05.200429+00:00",
+          "step": 0,
+          "name": "baseline",
+          "duration_seconds": 0,
+          "result": {
+            "exit_code": 1,
+            "stdout": "FAIL available_budget(100, 25, 10) {}: AssertionError: expected 65, got 75\nFAIL available_budget(100, 0, 100) {}: AssertionError: expected 0, got 100\nFAIL available_budget(100, 101, 0) {}: AssertionError: expected 0, got -1\nFAIL available_budget(100, 50, 51) {}: AssertionError: expected 0, got 50\nFAIL available_budget(1, 0, 1) {}: AssertionError: expected 0, got 1\nFAIL available_budget(10, 3, 2) {}: AssertionError: expected 5, got 7\nFAIL available_budget(10,) {'reserved': 4}: AssertionError: expected 6, got 10\nFAIL available_budget(10,) {'spent': 3, 'reserved': 2}: AssertionError: expected 5, got 7\nFAIL available_budget(1000000, 123456, 123456) {}: AssertionError: expected 753088, got 876544\nFAIL available_budget(-1,) {}: expected ValueError\nFAIL available_budget(0, -1) {}: expected ValueError\nFAIL available_budget(0, 0, -1) {}: expected ValueError\nFAIL available_budget(-1, -1, -1) {}: expected ValueError\nFAIL available_budget(1, 2, -1) {}: expected ValueError\nFAIL available_budget(1, -1, 2) {}: expected ValueError\n7/22 fixture checks passed\n",
+            "stderr": "",
+            "source_sha256": "d97c9c94e2245b0777431323310b7e995746ed3a1e1a2e0155ce816af64785f7"
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:06:15.321732+00:00",
+          "step": 0,
+          "name": "model_decision",
+          "duration_seconds": 0,
+          "result": {
+            "provider": "Antigravity",
+            "model": "claude-opus-5-5-high",
+            "action": {
+              "arguments": {},
+              "name": "inspect"
+            },
+            "usage": {
+              "input_tokens": 6788,
+              "output_tokens": 262,
+              "thinking_tokens": 0,
+              "cache_read_tokens": 13212,
+              "total_tokens": 7050
+            },
+            "duration_seconds": 3.9628995,
+            "cost": "not reported"
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:06:15.336128+00:00",
+          "step": 1,
+          "name": "inspect",
+          "duration_seconds": 0.0019,
+          "result": {
+            "source": "def available_budget(limit, spent=0, reserved=0):\n    \"\"\"Return the nonnegative budget remaining after spending and reservations.\"\"\"\n    return limit - spent\n",
+            "tests": "\"\"\"Trusted, immutable synthetic budget contract: no framework needed.\"\"\"\nfrom budget import available_budget\n\ncases = [\n    ((100,), {}, 100),\n    ((100, 25), {}, 75),\n    ((100, 25, 10), {}, 65),\n    ((100, 0, 100), {}, 0),\n    ((100, 100, 0), {}, 0),\n    ((100, 101, 0), {}, 0),\n    ((100, 50, 51), {}, 0),\n    ((0,), {}, 0),\n    ((0, 0, 0), {}, 0),\n    ((1, 0, 0), {}, 1),\n    ((1, 0, 1), {}, 0),\n    ((1, 1, 0), {}, 0),\n    ((10, 3, 2), {}, 5),\n    ((10,), {'reserved': 4}, 6),\n    ((10,), {'spent': 3, 'reserved': 2}, 5),\n    ((1000000, 123456, 123456), {}, 753088),\n]\ninvalid = [((-1,), {}), ((0, -1), {}), ((0, 0, -1), {}),\n           ((-1, -1, -1), {}), ((1, 2, -1), {}), ((1, -1, 2), {})]\nfailures = []\nfor args, kwargs, expected in cases:\n    try:\n        actual = available_budget(*args, **kwargs)\n        assert actual == expected, f'expected {expected}, got {actual}'\n    except Exception as error:\n        failures.append(f'available_budget{args} {kwargs}: {type(error).__name__}: {error}')\nfor args, kwargs in invalid:\n    try:\n        available_budget(*args, **kwargs)\n    except ValueError:\n        pass\n    except Exception as error:\n        failures.append(f'available_budget{args} {kwargs}: expected ValueError, got {type(error).__name__}')\n    else:\n        failures.append(f'available_budget{args} {kwargs}: expected ValueError')\nfor failure in failures:\n    print('FAIL ' + failure)\ncount = len(cases) + len(invalid)\nprint(f'{count - len(failures)}/{count} fixture checks passed')\nraise SystemExit(bool(failures))\n"
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:06:27.466562+00:00",
+          "step": 1,
+          "name": "model_decision",
+          "duration_seconds": 0,
+          "result": {
+            "provider": "Antigravity",
+            "model": "claude-opus-5-5-high",
+            "action": {
+              "arguments": {
+                "content": "def available_budget(limit, spent=0, reserved=0):\n    \"\"\"Return the nonnegative budget remaining after spending and reservations.\"\"\"\n    if min(limit, spent, reserved) < 0:\n        raise ValueError(\"limit, spent, and reserved must be nonnegative\")\n    return max(limit - spent - reserved, 0)\n",
+                "path": "budget.py",
+                "reason": "Reject any negative input with ValueError, subtract reserved as well as spent, and clamp the result at 0. The signature, defaults and docstring stay the same, and the code uses only the allowed constructs (if/raise/return, min/max, ValueError)."
+              },
+              "name": "replace_source"
+            },
+            "usage": {
+              "input_tokens": 7802,
+              "output_tokens": 624,
+              "thinking_tokens": 0,
+              "cache_read_tokens": 13212,
+              "total_tokens": 8426
+            },
+            "duration_seconds": 6.9009975,
+            "cost": "not reported"
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:06:27.481075+00:00",
+          "step": 2,
+          "name": "replace_source",
+          "duration_seconds": 0.0027,
+          "result": {
+            "applied": true,
+            "sha256": "0f5f7e84a7d94d9373a8820c0232ae68ae9f0c99d035243008c5a9a30191652c",
+            "reason": "Reject any negative input with ValueError, subtract reserved as well as spent, and clamp the result at 0. The signature, defaults and docstring stay the same, and the code uses only the allowed constructs (if/raise/return, min/max, ValueError)."
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:06:27.506086+00:00",
+          "step": 2,
+          "name": "intentional_checkpoint_resume",
+          "duration_seconds": 0,
+          "result": {
+            "checkpoint_step": 2,
+            "method": "New RepairRun instance from persisted state; no fake process crash"
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:06:35.201452+00:00",
+          "step": 2,
+          "name": "model_decision",
+          "duration_seconds": 0,
+          "result": {
+            "provider": "Antigravity",
+            "model": "claude-opus-5-5-high",
+            "action": {
+              "arguments": {},
+              "name": "verify"
+            },
+            "usage": {
+              "input_tokens": 8275,
+              "output_tokens": 251,
+              "thinking_tokens": 0,
+              "cache_read_tokens": 13212,
+              "total_tokens": 8526
+            },
+            "duration_seconds": 3.8717477000000002,
+            "cost": "not reported"
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:06:35.228756+00:00",
+          "step": 3,
+          "name": "injected_worker_failure",
+          "duration_seconds": 0,
+          "result": {
+            "exit_code": 75,
+            "stdout": "",
+            "stderr": "Controlled evaluation fault: CI worker unavailable. Retry with a fresh candidate.",
+            "injected_fault": "one transient worker outage; not a model-proposed code defect"
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:06:35.245430+00:00",
+          "step": 3,
+          "name": "verify",
+          "duration_seconds": 0.0295,
+          "result": {
+            "exit_code": 75,
+            "stdout": "",
+            "stderr": "Controlled evaluation fault: CI worker unavailable. Retry with a fresh candidate.",
+            "injected_fault": "one transient worker outage; not a model-proposed code defect",
+            "reverted_failed_candidate": true
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:06:46.123349+00:00",
+          "step": 3,
+          "name": "model_decision",
+          "duration_seconds": 0,
+          "result": {
+            "provider": "Antigravity",
+            "model": "claude-opus-5-5-high",
+            "action": {
+              "arguments": {
+                "content": "def available_budget(limit, spent=0, reserved=0):\n    \"\"\"Return the nonnegative budget remaining after spending and reservations.\"\"\"\n    if min(limit, spent, reserved) < 0:\n        raise ValueError(\"limit, spent, and reserved must be nonnegative\")\n    return max(limit - spent - reserved, 0)\n",
+                "path": "budget.py",
+                "reason": "The last verify didn't run the tests. A one-off CI worker outage (exit 75) stopped it, and the harness rolled the candidate back, so budget.py has the original buggy code again. Nothing showed a problem with the candidate, so this re-applies the same fix to be verified again. It rejects any negative input with ValueError, subtracts reserved as well as spent, and floors the result at 0. The signature, defaults and docstring are unchanged, and it only uses the allowed constructs (if/raise/return, min/max, ValueError)."
+              },
+              "name": "replace_source"
+            },
+            "usage": {
+              "input_tokens": 8444,
+              "output_tokens": 562,
+              "thinking_tokens": 0,
+              "cache_read_tokens": 13212,
+              "total_tokens": 9006
+            },
+            "duration_seconds": 7.3483213,
+            "cost": "not reported"
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:06:46.147448+00:00",
+          "step": 4,
+          "name": "replace_source",
+          "duration_seconds": 0.0067,
+          "result": {
+            "applied": true,
+            "sha256": "0f5f7e84a7d94d9373a8820c0232ae68ae9f0c99d035243008c5a9a30191652c",
+            "reason": "The last verify didn't run the tests. A one-off CI worker outage (exit 75) stopped it, and the harness rolled the candidate back, so budget.py has the original buggy code again. Nothing showed a problem with the candidate, so this re-applies the same fix to be verified again. It rejects any negative input with ValueError, subtracts reserved as well as spent, and floors the result at 0. The signature, defaults and docstring are unchanged, and it only uses the allowed constructs (if/raise/return, min/max, ValueError)."
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:06:52.698151+00:00",
+          "step": 4,
+          "name": "model_decision",
+          "duration_seconds": 0,
+          "result": {
+            "provider": "Antigravity",
+            "model": "claude-opus-5-5-high",
+            "action": {
+              "arguments": {},
+              "name": "verify"
+            },
+            "usage": {
+              "input_tokens": 9106,
+              "output_tokens": 210,
+              "thinking_tokens": 0,
+              "cache_read_tokens": 13212,
+              "total_tokens": 9316
+            },
+            "duration_seconds": 2.9806916,
+            "cost": "not reported"
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:06:52.817326+00:00",
+          "step": 5,
+          "name": "verify",
+          "duration_seconds": 0.1061,
+          "result": {
+            "exit_code": 0,
+            "stdout": "22/22 fixture checks passed\n",
+            "stderr": "",
+            "source_sha256": "0f5f7e84a7d94d9373a8820c0232ae68ae9f0c99d035243008c5a9a30191652c"
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:07:00.915351+00:00",
+          "step": 5,
+          "name": "model_decision",
+          "duration_seconds": 0,
+          "result": {
+            "provider": "Antigravity",
+            "model": "claude-opus-5-5-high",
+            "action": {
+              "arguments": {
+                "summary": "budget.py is fixed, and the tests on the current source pass: 22/22 fixture checks (exit 0, source sha256 0f5f7e84...). available_budget(limit, spent=0, reserved=0) now raises ValueError if limit, spent or reserved is negative. Otherwise it returns max(limit - spent - reserved, 0). The signature, defaults and docstring are unchanged, and the code only uses the allowed constructs. The first verify never ran the tests: a one-off CI worker outage (exit 75) stopped it and the harness rolled the candidate back. That outage wasn't caused by the code. I re-applied the same fix and verified again, and that run passed."
+              },
+              "name": "finish"
+            },
+            "usage": {
+              "input_tokens": 9263,
+              "output_tokens": 434,
+              "thinking_tokens": 0,
+              "cache_read_tokens": 13212,
+              "total_tokens": 9697
+            },
+            "duration_seconds": 4.8568601000000005,
+            "cost": "not reported"
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:07:00.934221+00:00",
+          "step": 6,
+          "name": "finish",
+          "duration_seconds": 0.0023,
+          "result": {
+            "status": "verified",
+            "summary": "budget.py is fixed, and the tests on the current source pass: 22/22 fixture checks (exit 0, source sha256 0f5f7e84...). available_budget(limit, spent=0, reserved=0) now raises ValueError if limit, spent or reserved is negative. Otherwise it returns max(limit - spent - reserved, 0). The signature, defaults and docstring are unchanged, and the code only uses the allowed constructs. The first verify never ran the tests: a one-off CI worker outage (exit 75) stopped it and the harness rolled the candidate back. That outage wasn't caused by the code. I re-applied the same fix and verified again, and that run passed."
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:07:01.078995+00:00",
+          "step": 6,
+          "name": "independent_final_verification",
+          "duration_seconds": 0,
+          "result": {
+            "exit_code": 0,
+            "stdout": "22/22 fixture checks passed\n",
+            "stderr": "",
+            "source_sha256": "0f5f7e84a7d94d9373a8820c0232ae68ae9f0c99d035243008c5a9a30191652c"
+          }
+        }
+      ],
+      "repaired_source": "def available_budget(limit, spent=0, reserved=0):\n    \"\"\"Return the nonnegative budget remaining after spending and reservations.\"\"\"\n    if min(limit, spent, reserved) < 0:\n        raise ValueError(\"limit, spent, and reserved must be nonnegative\")\n    return max(limit - spent - reserved, 0)\n",
+      "independent_final_verification": {
+        "exit_code": 0,
+        "stdout": "22/22 fixture checks passed\n",
+        "stderr": "",
+        "source_sha256": "0f5f7e84a7d94d9373a8820c0232ae68ae9f0c99d035243008c5a9a30191652c"
+      }
+    }
+  ]
+}

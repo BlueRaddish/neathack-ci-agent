@@ -1,0 +1,500 @@
+{
+  "format_version": 1,
+  "repo_root": ".",
+  "commit": "ad2ac2fea21a62bf46152fff7ed734283e12c808",
+  "tree": "d34bd6312e109fa16b14b11105f194fad4f616e8",
+  "profile": "full",
+  "query": "RepairRun.tests",
+  "depth": 2,
+  "index_cache_hit": false,
+  "index_latency_ms": 578,
+  "query_latency_ms": 2,
+  "total_latency_ms": 580,
+  "focus_matches_total": 1,
+  "disambiguation_required": false,
+  "focus": {
+    "id": "gh/BlueRaddish/neathack-ci-agent:Python:agent.py:method:RepairRun.tests",
+    "name": "tests",
+    "qualified_name": "RepairRun.tests",
+    "kind": "method",
+    "file_path": "agent.py",
+    "start_line": 197,
+    "end_line": 216,
+    "language": "Python"
+  },
+  "container": {
+    "id": "gh/BlueRaddish/neathack-ci-agent:Python:agent.py:class:RepairRun",
+    "name": "RepairRun",
+    "qualified_name": "RepairRun",
+    "kind": "class",
+    "file_path": "agent.py",
+    "start_line": 103,
+    "end_line": 444,
+    "language": "Python"
+  },
+  "callers": {
+    "total": 6,
+    "direct": 3,
+    "transitive": 3,
+    "in": 3,
+    "entries": [
+      {
+        "endpoint": {
+          "id": "gh/BlueRaddish/neathack-ci-agent:Python:agent.py:tool:RepairRun",
+          "name": "RepairRun",
+          "qualified_name": "RepairRun",
+          "kind": "tool",
+          "file_path": "agent.py",
+          "start_line": 103,
+          "end_line": 444,
+          "language": "Python"
+        },
+        "relation": "CALLS",
+        "direction": "in",
+        "depth": 1,
+        "call_site": {
+          "file_path": "agent.py",
+          "line": 197,
+          "additional_sites": 4
+        }
+      },
+      {
+        "endpoint": {
+          "id": "gh/BlueRaddish/neathack-ci-agent:Python:agent.py:method:RepairRun.action",
+          "name": "action",
+          "qualified_name": "RepairRun.action",
+          "kind": "method",
+          "file_path": "agent.py",
+          "start_line": 219,
+          "end_line": 264,
+          "language": "Python"
+        },
+        "relation": "CALLS",
+        "direction": "in",
+        "depth": 1,
+        "call_site": {
+          "file_path": "agent.py",
+          "line": 242
+        }
+      },
+      {
+        "endpoint": {
+          "id": "gh/BlueRaddish/neathack-ci-agent:Python:agent.py:method:RepairRun.run",
+          "name": "run",
+          "qualified_name": "RepairRun.run",
+          "kind": "method",
+          "file_path": "agent.py",
+          "start_line": 341,
+          "end_line": 429,
+          "language": "Python"
+        },
+        "relation": "CALLS",
+        "direction": "in",
+        "depth": 1,
+        "call_site": {
+          "file_path": "agent.py",
+          "line": 349,
+          "additional_sites": 1
+        }
+      },
+      {
+        "endpoint": {
+          "id": "gh/BlueRaddish/neathack-ci-agent:Python:agent.py:method:RepairRun.execute",
+          "name": "execute",
+          "qualified_name": "RepairRun.execute",
+          "kind": "method",
+          "file_path": "agent.py",
+          "start_line": 266,
+          "end_line": 281,
+          "language": "Python"
+        },
+        "relation": "CALLS",
+        "direction": "in",
+        "depth": 2,
+        "via": "RepairRun.action",
+        "call_site": {
+          "file_path": "agent.py",
+          "line": 275
+        }
+      },
+      {
+        "endpoint": {
+          "id": "gh/BlueRaddish/neathack-ci-agent:Python:agent.py:function:main",
+          "name": "main",
+          "qualified_name": "main",
+          "kind": "function",
+          "file_path": "agent.py",
+          "start_line": 455,
+          "end_line": 486,
+          "language": "Python"
+        },
+        "relation": "CALLS",
+        "direction": "in",
+        "depth": 2,
+        "via": "RepairRun.run",
+        "call_site": {
+          "file_path": "agent.py",
+          "line": 468,
+          "additional_sites": 9
+        }
+      },
+      {
+        "endpoint": {
+          "id": "gh/BlueRaddish/neathack-ci-agent:Python:evaluate.py:function:main",
+          "name": "main",
+          "qualified_name": "main",
+          "kind": "function",
+          "file_path": "evaluate.py",
+          "start_line": 54,
+          "end_line": 107,
+          "language": "Python"
+        },
+        "relation": "CALLS",
+        "direction": "in",
+        "depth": 2,
+        "via": "RepairRun.run",
+        "call_site": {
+          "file_path": "evaluate.py",
+          "line": 72,
+          "additional_sites": 17
+        }
+      }
+    ]
+  },
+  "callees": {
+    "total": 6,
+    "out": 6,
+    "entries": [
+      {
+        "endpoint": {
+          "id": "external:symbol:json.dumps",
+          "name": "dumps",
+          "qualified_name": "json.dumps",
+          "kind": "symbol",
+          "external": true
+        },
+        "relation": "CALLS",
+        "direction": "out",
+        "depth": 1
+      },
+      {
+        "endpoint": {
+          "id": "external:symbol:os.environ.items",
+          "name": "items",
+          "qualified_name": "os.environ.items",
+          "kind": "symbol",
+          "external": true
+        },
+        "relation": "CALLS",
+        "direction": "out",
+        "depth": 1
+      },
+      {
+        "endpoint": {
+          "id": "external:symbol:pathlib.Path",
+          "name": "Path",
+          "qualified_name": "pathlib.Path",
+          "kind": "symbol",
+          "external": true
+        },
+        "relation": "CALLS",
+        "direction": "out",
+        "depth": 1
+      },
+      {
+        "endpoint": {
+          "id": "external:symbol:subprocess.run",
+          "name": "run",
+          "qualified_name": "subprocess.run",
+          "kind": "symbol",
+          "external": true
+        },
+        "relation": "CALLS",
+        "direction": "out",
+        "depth": 1
+      },
+      {
+        "endpoint": {
+          "id": "gh/BlueRaddish/neathack-ci-agent:Python:agent.py:function:digest",
+          "name": "digest",
+          "qualified_name": "digest",
+          "kind": "function",
+          "file_path": "agent.py",
+          "start_line": 51,
+          "end_line": 52,
+          "language": "Python"
+        },
+        "relation": "CALLS",
+        "direction": "out",
+        "depth": 1
+      },
+      {
+        "endpoint": {
+          "id": "gh/BlueRaddish/neathack-ci-agent:Python:agent.py:function:validate_source",
+          "name": "validate_source",
+          "qualified_name": "validate_source",
+          "kind": "function",
+          "file_path": "agent.py",
+          "start_line": 71,
+          "end_line": 101,
+          "language": "Python"
+        },
+        "relation": "CALLS",
+        "direction": "out",
+        "depth": 1
+      }
+    ]
+  },
+  "type_consumers": {
+    "total": 0,
+    "entries": []
+  },
+  "data_flows": {
+    "total": 0,
+    "entries": []
+  },
+  "co_changes": {
+    "total": 6,
+    "entries": [
+      {
+        "endpoint": {
+          "id": "gh/BlueRaddish/neathack-ci-agent:file:README.md",
+          "name": "README.md",
+          "kind": "file",
+          "file_path": "README.md",
+          "language": "Markdown"
+        },
+        "relation": "FILE_CHANGES_WITH",
+        "detail": "files changed together in 2 recent commits"
+      },
+      {
+        "endpoint": {
+          "id": "gh/BlueRaddish/neathack-ci-agent:file:business-plan-input.md",
+          "name": "business-plan-input.md",
+          "kind": "file",
+          "file_path": "business-plan-input.md",
+          "language": "Markdown"
+        },
+        "relation": "FILE_CHANGES_WITH",
+        "detail": "files changed together in 2 recent commits"
+      },
+      {
+        "endpoint": {
+          "id": "gh/BlueRaddish/neathack-ci-agent:file:check.py",
+          "name": "check.py",
+          "kind": "file",
+          "file_path": "check.py",
+          "language": "Python"
+        },
+        "relation": "FILE_CHANGES_WITH",
+        "detail": "files changed together in 3 recent commits"
+      },
+      {
+        "endpoint": {
+          "id": "gh/BlueRaddish/neathack-ci-agent:file:check_cases.py",
+          "name": "check_cases.py",
+          "kind": "file",
+          "file_path": "check_cases.py",
+          "language": "Python"
+        },
+        "relation": "FILE_CHANGES_WITH",
+        "detail": "files changed together in 2 recent commits"
+      },
+      {
+        "endpoint": {
+          "id": "gh/BlueRaddish/neathack-ci-agent:file:evaluate.py",
+          "name": "evaluate.py",
+          "kind": "file",
+          "file_path": "evaluate.py",
+          "language": "Python"
+        },
+        "relation": "FILE_CHANGES_WITH",
+        "detail": "files changed together in 2 recent commits"
+      },
+      {
+        "endpoint": {
+          "id": "gh/BlueRaddish/neathack-ci-agent:file:fixtures/backoff/test_case.py",
+          "name": "test_case.py",
+          "kind": "file",
+          "file_path": "fixtures/backoff/test_case.py",
+          "language": "Python"
+        },
+        "relation": "FILE_CHANGES_WITH",
+        "detail": "files changed together in 2 recent commits"
+      }
+    ]
+  },
+  "siblings": {
+    "total": 11,
+    "entries": [
+      {
+        "endpoint": {
+          "id": "gh/BlueRaddish/neathack-ci-agent:Python:agent.py:tool:RepairRun",
+          "name": "RepairRun",
+          "qualified_name": "RepairRun",
+          "kind": "tool",
+          "file_path": "agent.py",
+          "start_line": 103,
+          "end_line": 444,
+          "language": "Python"
+        },
+        "detail": "sibling"
+      },
+      {
+        "endpoint": {
+          "id": "gh/BlueRaddish/neathack-ci-agent:Python:agent.py:method:RepairRun.__init__",
+          "name": "__init__",
+          "qualified_name": "RepairRun.__init__",
+          "kind": "method",
+          "file_path": "agent.py",
+          "start_line": 104,
+          "end_line": 168,
+          "language": "Python"
+        },
+        "detail": "sibling"
+      },
+      {
+        "endpoint": {
+          "id": "gh/BlueRaddish/neathack-ci-agent:Python:agent.py:method:RepairRun.save",
+          "name": "save",
+          "qualified_name": "RepairRun.save",
+          "kind": "method",
+          "file_path": "agent.py",
+          "start_line": 170,
+          "end_line": 171,
+          "language": "Python"
+        },
+        "detail": "sibling"
+      },
+      {
+        "endpoint": {
+          "id": "gh/BlueRaddish/neathack-ci-agent:Python:agent.py:method:RepairRun.replace_file",
+          "name": "replace_file",
+          "qualified_name": "RepairRun.replace_file",
+          "kind": "method",
+          "file_path": "agent.py",
+          "start_line": 173,
+          "end_line": 177,
+          "language": "Python"
+        },
+        "detail": "sibling"
+      },
+      {
+        "endpoint": {
+          "id": "gh/BlueRaddish/neathack-ci-agent:Python:agent.py:method:RepairRun.observation",
+          "name": "observation",
+          "qualified_name": "RepairRun.observation",
+          "kind": "method",
+          "file_path": "agent.py",
+          "start_line": 179,
+          "end_line": 183,
+          "language": "Python"
+        },
+        "detail": "sibling"
+      },
+      {
+        "endpoint": {
+          "id": "gh/BlueRaddish/neathack-ci-agent:Python:agent.py:method:RepairRun.event",
+          "name": "event",
+          "qualified_name": "RepairRun.event",
+          "kind": "method",
+          "file_path": "agent.py",
+          "start_line": 185,
+          "end_line": 194,
+          "language": "Python"
+        },
+        "detail": "sibling"
+      },
+      {
+        "endpoint": {
+          "id": "gh/BlueRaddish/neathack-ci-agent:Python:agent.py:method:RepairRun.action",
+          "name": "action",
+          "qualified_name": "RepairRun.action",
+          "kind": "method",
+          "file_path": "agent.py",
+          "start_line": 219,
+          "end_line": 264,
+          "language": "Python"
+        },
+        "detail": "sibling"
+      },
+      {
+        "endpoint": {
+          "id": "gh/BlueRaddish/neathack-ci-agent:Python:agent.py:method:RepairRun.execute",
+          "name": "execute",
+          "qualified_name": "RepairRun.execute",
+          "kind": "method",
+          "file_path": "agent.py",
+          "start_line": 266,
+          "end_line": 281,
+          "language": "Python"
+        },
+        "detail": "sibling"
+      }
+    ]
+  },
+  "warnings": [
+    {
+      "code": "W_WORKTREE_SNAPSHOT",
+      "severity": "warning",
+      "effect_on_semantic_completeness": "snapshot records are read from the working tree because --worktree was requested"
+    }
+  ],
+  "partial_failures": [],
+  "stats": {
+    "files": 38,
+    "parsed_files": 38,
+    "symbols": 577,
+    "relations": 1349,
+    "partial_failures": 0,
+    "completeness_level": "ok"
+  },
+  "completeness": {
+    "languages": {
+      "Git Ignore": {
+        "files": 1,
+        "symbols": 1
+      },
+      "JSON": {
+        "files": 15,
+        "symbols": 508
+      },
+      "Markdown": {
+        "files": 10,
+        "symbols": 33
+      },
+      "Pip Requirements": {
+        "files": 1,
+        "symbols": 1
+      },
+      "Python": {
+        "files": 10,
+        "symbols": 30
+      },
+      "YAML": {
+        "files": 1,
+        "symbols": 4
+      }
+    },
+    "relations": {
+      "CALLS": 156,
+      "CONFIGURES": 511,
+      "CONSTRUCTS": 3,
+      "CONTAINS": 18,
+      "DATA_FLOWS": 5,
+      "DEFINES": 577,
+      "EXTENDS": 1,
+      "FILE_CHANGES_WITH": 13,
+      "HANDLES_TOOL": 4,
+      "IMPORTS": 59,
+      "INHERITS": 1,
+      "OVERRIDES": 1
+    }
+  },
+  "completeness_scope": {
+    "language": "Python",
+    "language_files": 10,
+    "worktree_snapshot": true,
+    "level": "ok"
+  }
+}

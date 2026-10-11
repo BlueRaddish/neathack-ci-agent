@@ -1,0 +1,319 @@
+{
+  "time_utc": "2026-10-11T13:09:05.185735+00:00",
+  "scope": "Fresh synthetic arithmetic policies; not a benchmark or arbitrary repository repair",
+  "fault_label": "Controlled transient CI worker outage",
+  "neatlogs_export_configured": false,
+  "results": [
+    {
+      "case": "backoff",
+      "mode": "agy",
+      "run_id": "20261011T130905Z-330e417c",
+      "status": "verified",
+      "steps": 6,
+      "elapsed_seconds": 46.46,
+      "baseline": {
+        "exit_code": 1,
+        "stdout": "FAIL retry_delay(5, 1, 30): expected 30, got 32\nFAIL retry_delay(10, 1, 30): expected 30, got 1024\nFAIL retry_delay(5, 2, 30): expected 30, got 64\nFAIL retry_delay(2, 1, 3): expected 3, got 4\nFAIL retry_delay(-1, 1, 30): expected ValueError\nFAIL retry_delay(0, 0, 30): expected ValueError\nFAIL retry_delay(0, 1, 0): expected ValueError\nFAIL retry_delay(0, -1, 30): expected ValueError\nFAIL retry_delay(0, 1, -1): expected ValueError\n4/13 fixture checks passed\n",
+        "stderr": "",
+        "source_sha256": "d3a9b93d9a163655d10c580b05e1329fc0955041a0fd1dc0e84b75beeb54145d"
+      },
+      "final_verification": {
+        "exit_code": 0,
+        "stdout": "13/13 fixture checks passed\n",
+        "stderr": "",
+        "source_sha256": "f46cdb73ba087e8720576d04e597e2b45808245b9df86b2439daea8694ff8d70"
+      },
+      "source_sha256": "f46cdb73ba087e8720576d04e597e2b45808245b9df86b2439daea8694ff8d70",
+      "test_sha256": "d5f67849dbe58478ae27a3c9edb34c6d49389273c1f3b1c231e22db8dae2e457",
+      "rollbacks": 1,
+      "tool_errors": 0,
+      "intentional_interruption": true,
+      "controlled_worker_fault": true,
+      "model": "claude-opus-5-5-high",
+      "usage": {
+        "input_tokens": 45078,
+        "output_tokens": 2266,
+        "thinking_tokens": 0,
+        "cache_read_tokens": 79272,
+        "total_tokens": 47344
+      },
+      "cost": "Provider CLI did not report monetary cost",
+      "events": [
+        {
+          "time_utc": "2026-10-11T13:09:05.331417+00:00",
+          "step": 0,
+          "name": "baseline",
+          "duration_seconds": 0,
+          "result": {
+            "exit_code": 1,
+            "stdout": "FAIL retry_delay(5, 1, 30): expected 30, got 32\nFAIL retry_delay(10, 1, 30): expected 30, got 1024\nFAIL retry_delay(5, 2, 30): expected 30, got 64\nFAIL retry_delay(2, 1, 3): expected 3, got 4\nFAIL retry_delay(-1, 1, 30): expected ValueError\nFAIL retry_delay(0, 0, 30): expected ValueError\nFAIL retry_delay(0, 1, 0): expected ValueError\nFAIL retry_delay(0, -1, 30): expected ValueError\nFAIL retry_delay(0, 1, -1): expected ValueError\n4/13 fixture checks passed\n",
+            "stderr": "",
+            "source_sha256": "d3a9b93d9a163655d10c580b05e1329fc0955041a0fd1dc0e84b75beeb54145d"
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:09:12.041404+00:00",
+          "step": 0,
+          "name": "model_decision",
+          "duration_seconds": 0,
+          "result": {
+            "provider": "Antigravity",
+            "model": "claude-opus-5-5-high",
+            "action": {
+              "arguments": {},
+              "name": "inspect"
+            },
+            "usage": {
+              "input_tokens": 6376,
+              "output_tokens": 273,
+              "thinking_tokens": 0,
+              "cache_read_tokens": 13212,
+              "total_tokens": 6649
+            },
+            "duration_seconds": 3.3775713,
+            "cost": "not reported",
+            "provider_receipt": "provider/decision-0-dae5ab3b.ndjson"
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:09:12.056265+00:00",
+          "step": 1,
+          "name": "inspect",
+          "duration_seconds": 0.0031,
+          "result": {
+            "source": "def retry_delay(attempt, base=1, cap=30):\n    \"\"\"Return the bounded delay for a zero-based retry attempt.\"\"\"\n    return base * 2 ** attempt\n",
+            "tests": "\"\"\"Trusted, immutable fixture contract: no framework needed.\"\"\"\nfrom backoff import retry_delay\n\ncases = [(0, 1, 30, 1), (1, 1, 30, 2), (5, 1, 30, 30), (10, 1, 30, 30),\n         (0, 2, 30, 2), (3, 2, 30, 16), (5, 2, 30, 30), (2, 1, 3, 3)]\nfailures = []\nfor attempt, base, cap, expected in cases:\n    actual = retry_delay(attempt, base, cap)\n    if actual != expected:\n        failures.append(f'retry_delay({attempt}, {base}, {cap}): expected {expected}, got {actual}')\ninvalid = [(-1, 1, 30), (0, 0, 30), (0, 1, 0), (0, -1, 30), (0, 1, -1)]\nfor args in invalid:\n    try:\n        retry_delay(*args)\n    except ValueError:\n        pass\n    else:\n        failures.append(f'retry_delay{args}: expected ValueError')\nfor failure in failures:\n    print('FAIL ' + failure)\ncount = len(cases) + len(invalid)\nprint(f'{count - len(failures)}/{count} fixture checks passed')\nraise SystemExit(bool(failures))\n"
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:09:20.867217+00:00",
+          "step": 1,
+          "name": "model_decision",
+          "duration_seconds": 0,
+          "result": {
+            "provider": "Antigravity",
+            "model": "claude-opus-5-5-high",
+            "action": {
+              "arguments": {
+                "content": "def retry_delay(attempt, base=1, cap=30):\n    \"\"\"Return the bounded delay for a zero-based retry attempt.\"\"\"\n    if attempt < 0 or base <= 0 or cap <= 0:\n        raise ValueError(\"attempt must be >= 0 and base/cap must be > 0\")\n    return min(cap, base * 2 ** attempt)\n",
+                "path": "backoff.py",
+                "reason": "Reject invalid inputs (negative attempt, non-positive base or cap) with ValueError and clamp exponential delay to cap via min; signature and defaults preserved."
+              },
+              "name": "replace_source"
+            },
+            "usage": {
+              "input_tokens": 7049,
+              "output_tokens": 629,
+              "thinking_tokens": 0,
+              "cache_read_tokens": 13212,
+              "total_tokens": 7678
+            },
+            "duration_seconds": 5.8940851,
+            "cost": "not reported",
+            "provider_receipt": "provider/decision-1-c66aa8e2.ndjson"
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:09:20.900089+00:00",
+          "step": 2,
+          "name": "replace_source",
+          "duration_seconds": 0.0068,
+          "result": {
+            "applied": true,
+            "sha256": "f46cdb73ba087e8720576d04e597e2b45808245b9df86b2439daea8694ff8d70",
+            "reason": "Reject invalid inputs (negative attempt, non-positive base or cap) with ValueError and clamp exponential delay to cap via min; signature and defaults preserved."
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:09:20.930969+00:00",
+          "step": 2,
+          "name": "intentional_checkpoint_resume",
+          "duration_seconds": 0,
+          "result": {
+            "checkpoint_step": 2,
+            "method": "New RepairRun instance from persisted state; no fake process crash"
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:09:28.758931+00:00",
+          "step": 2,
+          "name": "model_decision",
+          "duration_seconds": 0,
+          "result": {
+            "provider": "Antigravity",
+            "model": "claude-opus-5-5-high",
+            "action": {
+              "arguments": {},
+              "name": "verify"
+            },
+            "usage": {
+              "input_tokens": 7488,
+              "output_tokens": 221,
+              "thinking_tokens": 0,
+              "cache_read_tokens": 13212,
+              "total_tokens": 7709
+            },
+            "duration_seconds": 3.2942168,
+            "cost": "not reported",
+            "provider_receipt": "provider/decision-2-e4cdb408.ndjson"
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:09:28.791941+00:00",
+          "step": 3,
+          "name": "injected_worker_failure",
+          "duration_seconds": 0,
+          "result": {
+            "exit_code": 75,
+            "stdout": "",
+            "stderr": "Controlled evaluation fault: CI worker unavailable. Retry with a fresh candidate.",
+            "injected_fault": "one transient worker outage; not a model-proposed code defect"
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:09:28.808213+00:00",
+          "step": 3,
+          "name": "verify",
+          "duration_seconds": 0.0337,
+          "result": {
+            "exit_code": 75,
+            "stdout": "",
+            "stderr": "Controlled evaluation fault: CI worker unavailable. Retry with a fresh candidate.",
+            "injected_fault": "one transient worker outage; not a model-proposed code defect",
+            "reverted_failed_candidate": true
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:09:37.422633+00:00",
+          "step": 3,
+          "name": "model_decision",
+          "duration_seconds": 0,
+          "result": {
+            "provider": "Antigravity",
+            "model": "claude-opus-5-5-high",
+            "action": {
+              "arguments": {
+                "content": "def retry_delay(attempt, base=1, cap=30):\n    \"\"\"Return the bounded delay for a zero-based retry attempt.\"\"\"\n    if attempt < 0 or base <= 0 or cap <= 0:\n        raise ValueError(\"attempt must be >= 0 and base/cap must be > 0\")\n    return min(cap, base * 2 ** attempt)\n",
+                "path": "backoff.py",
+                "reason": "Re-apply the same candidate. The last verify failed because of a temporary CI worker outage (exit 75), not a code defect, and the candidate was rolled back. It rejects bad inputs (negative attempt, base or cap of zero or less) with ValueError and limits the delay to cap using min. The signature and defaults are unchanged."
+              },
+              "name": "replace_source"
+            },
+            "usage": {
+              "input_tokens": 7643,
+              "output_tokens": 542,
+              "thinking_tokens": 0,
+              "cache_read_tokens": 13212,
+              "total_tokens": 8185
+            },
+            "duration_seconds": 5.7412145,
+            "cost": "not reported",
+            "provider_receipt": "provider/decision-3-10a692a3.ndjson"
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:09:37.440487+00:00",
+          "step": 4,
+          "name": "replace_source",
+          "duration_seconds": 0.0046,
+          "result": {
+            "applied": true,
+            "sha256": "f46cdb73ba087e8720576d04e597e2b45808245b9df86b2439daea8694ff8d70",
+            "reason": "Re-apply the same candidate. The last verify failed because of a temporary CI worker outage (exit 75), not a code defect, and the candidate was rolled back. It rejects bad inputs (negative attempt, base or cap of zero or less) with ValueError and limits the delay to cap using min. The signature and defaults are unchanged."
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:09:43.577278+00:00",
+          "step": 4,
+          "name": "model_decision",
+          "duration_seconds": 0,
+          "result": {
+            "provider": "Antigravity",
+            "model": "claude-opus-5-5-high",
+            "action": {
+              "arguments": {},
+              "name": "verify"
+            },
+            "usage": {
+              "input_tokens": 8185,
+              "output_tokens": 169,
+              "thinking_tokens": 0,
+              "cache_read_tokens": 13212,
+              "total_tokens": 8354
+            },
+            "duration_seconds": 2.9976275,
+            "cost": "not reported",
+            "provider_receipt": "provider/decision-4-b4f1e782.ndjson"
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:09:43.716523+00:00",
+          "step": 5,
+          "name": "verify",
+          "duration_seconds": 0.1227,
+          "result": {
+            "exit_code": 0,
+            "stdout": "13/13 fixture checks passed\n",
+            "stderr": "",
+            "source_sha256": "f46cdb73ba087e8720576d04e597e2b45808245b9df86b2439daea8694ff8d70"
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:09:51.498050+00:00",
+          "step": 5,
+          "name": "model_decision",
+          "duration_seconds": 0,
+          "result": {
+            "provider": "Antigravity",
+            "model": "claude-opus-5-5-high",
+            "action": {
+              "arguments": {
+                "summary": "Fixed retry_delay in backoff.py and kept its signature (attempt, base=1, cap=30). It now raises ValueError if attempt < 0, base <= 0 or cap <= 0. Otherwise it returns min(cap, base * 2 ** attempt). The first verify run didn't test the code: the CI worker was down (exit 75) and the candidate was rolled back. I re-applied the same candidate and the second verify run passed all 13 fixture checks (exit 0, source sha256 f46cdb73ba087e8720576d04e597e2b45808245b9df86b2439daea8694ff8d70)."
+              },
+              "name": "finish"
+            },
+            "usage": {
+              "input_tokens": 8337,
+              "output_tokens": 432,
+              "thinking_tokens": 0,
+              "cache_read_tokens": 13212,
+              "total_tokens": 8769
+            },
+            "duration_seconds": 4.8331757,
+            "cost": "not reported",
+            "provider_receipt": "provider/decision-5-c545af7a.ndjson"
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:09:51.512062+00:00",
+          "step": 6,
+          "name": "finish",
+          "duration_seconds": 0.002,
+          "result": {
+            "status": "verified",
+            "summary": "Fixed retry_delay in backoff.py and kept its signature (attempt, base=1, cap=30). It now raises ValueError if attempt < 0, base <= 0 or cap <= 0. Otherwise it returns min(cap, base * 2 ** attempt). The first verify run didn't test the code: the CI worker was down (exit 75) and the candidate was rolled back. I re-applied the same candidate and the second verify run passed all 13 fixture checks (exit 0, source sha256 f46cdb73ba087e8720576d04e597e2b45808245b9df86b2439daea8694ff8d70)."
+          }
+        },
+        {
+          "time_utc": "2026-10-11T13:09:51.650669+00:00",
+          "step": 6,
+          "name": "independent_final_verification",
+          "duration_seconds": 0,
+          "result": {
+            "exit_code": 0,
+            "stdout": "13/13 fixture checks passed\n",
+            "stderr": "",
+            "source_sha256": "f46cdb73ba087e8720576d04e597e2b45808245b9df86b2439daea8694ff8d70"
+          }
+        }
+      ],
+      "repaired_source": "def retry_delay(attempt, base=1, cap=30):\n    \"\"\"Return the bounded delay for a zero-based retry attempt.\"\"\"\n    if attempt < 0 or base <= 0 or cap <= 0:\n        raise ValueError(\"attempt must be >= 0 and base/cap must be > 0\")\n    return min(cap, base * 2 ** attempt)\n",
+      "independent_final_verification": {
+        "exit_code": 0,
+        "stdout": "13/13 fixture checks passed\n",
+        "stderr": "",
+        "source_sha256": "f46cdb73ba087e8720576d04e597e2b45808245b9df86b2439daea8694ff8d70"
+      }
+    }
+  ]
+}

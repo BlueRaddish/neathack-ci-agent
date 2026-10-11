@@ -1,0 +1,29 @@
+{
+  "time_utc": "2026-10-11T12:57:37.302516+00:00",
+  "scope": "Fresh synthetic arithmetic policies; not a benchmark or arbitrary repository repair",
+  "fault_label": "Controlled transient CI worker outage",
+  "neatlogs_export_configured": false,
+  "results": [
+    {
+      "case": "backoff",
+      "status": "error",
+      "run_id": "20261011T125737Z-41865081",
+      "error_type": "JSONDecodeError",
+      "elapsed_seconds": 94.93
+    },
+    {
+      "case": "pagination",
+      "status": "error",
+      "run_id": "20261011T125912Z-23da7728",
+      "error_type": "JSONDecodeError",
+      "elapsed_seconds": 94.75
+    },
+    {
+      "case": "budget",
+      "status": "error",
+      "run_id": "20261011T130047Z-5cf7534f",
+      "error_type": "JSONDecodeError",
+      "elapsed_seconds": 170.37
+    }
+  ]
+}

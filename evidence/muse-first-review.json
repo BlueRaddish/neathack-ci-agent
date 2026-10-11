@@ -1,0 +1,33 @@
+{
+  "snapshot_commit": "b48c31874927c26be39c932d7a6966c7dc4be702",
+  "provider": "meta",
+  "model": "muse-spark-1.3",
+  "effort": "high",
+  "command_id": "22b75f85-1d5f-4c44-82ff-bb74674df7e9",
+  "session_id": "01a12b02-3902-7f80-9ae9-200116fcbdee",
+  "response_id": "resp_6acb85b2c60de0aa4187473f",
+  "exit_code": 0,
+  "terminal": "completed",
+  "source": "Observed muse exec JSONL terminal and provider stream_succeeded events; this compact record transcribes the successful final output. Raw stdout was not saved and tool output was truncated.",
+  "controls": [
+    "max-model-steps=2",
+    "disable-write",
+    "disable-shell",
+    "disable-web-tools",
+    "disable-reminders",
+    "no-foreign-personal-context",
+    "no-session-log",
+    "scratch working directory outside repository"
+  ],
+  "flag_override_correction": "Windows PowerShell 5.1 removed CLY_FLAGS when assigned an empty string, so the Muse profile's configured --yolo was inherited. Explicit shell/write/web disabling controls were still supplied. Correct empty CLY_FLAGS override via Python child env was subsequently verified through cly config, without rerunning inference or changing global configuration.",
+  "resets_used": 0,
+  "token_usage": "not captured",
+  "prioritized_changes": [
+    "Authenticated live repair through event gateway plus matching neatlogs trace export/readback",
+    "Actual cfo.ai-generated pricing/cost/runway plan with honest base/downside/growth assumptions",
+    "Registration, cutoff confirmation, build-in-public posts and actual quote-post submission receipt",
+    "At most three minute video showing actual workflow and all three partners",
+    "Second independent repair case with real failed-candidate recovery and unchanged tests"
+  ],
+  "snapshot_correction": "Both reviewers relied on stale pending-publication prose. The public repository was already verified; their signup handoff is superseded by user authorization and actual access limitations."
+}
