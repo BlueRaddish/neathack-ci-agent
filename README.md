@@ -1,93 +1,101 @@
-# neatHack CI recovery agent
+# ProofPatch
 
-A fresh October 10, 2026 hackathon project: reproduce a failing retry-delay test,
-inspect the source, propose a repair, recover from unsuccessful actions, and
-finish only after the unchanged tests pass. The first milestone is a small,
-verifiable repair loop. Broader CI issue repair is future scope.
+An autonomous repair loop that finishes with independently checked evidence.
+It inspects a failing arithmetic policy, proposes a scoped edit, runs unchanged
+tests, rolls back unsuccessful candidates, and resumes from durable state.
 
-## Run the current milestone
+This is fresh neatHack code created October 10–11, 2026. The three declared
+synthetic tasks are exponential backoff, pagination boundaries, and available
+budget. It does not repair arbitrary production repositories.
 
-For a fresh clone, Python 3.10–3.13 is required:
+## Reproduce
+
+Python 3.10–3.13, in PowerShell:
 
 ```powershell
 python -m venv .venv
 .venv/Scripts/python.exe -m pip install -r requirements-lock.txt
+.venv/Scripts/python.exe -B check.py
+.venv/Scripts/python.exe -B check_cases.py
+.venv/Scripts/python.exe -B agent.py --mode replay --case pagination
 ```
 
-From this repository in PowerShell:
+Replay is an explicitly scripted development check, not AI inference. It
+exercises a rejected path, failing candidate, rollback, and verified repair.
+Each private `.runs/<id>/` directory retains state, events, a workspace and report.
+Resume with `--resume .runs/<id>` using the original mode. The stored case is
+loaded automatically; a different case is rejected.
+
+## Real model evaluation
+
+The installed, signed-in Antigravity CLI can supply structured model decisions:
 
 ```powershell
-.venv/Scripts/python.exe check.py
-.venv/Scripts/python.exe agent.py --mode replay
+.venv/Scripts/python.exe -B agent.py --mode agy --case budget
+.venv/Scripts/python.exe -B evaluate.py --mode agy --worker-fault --interrupt-after 2
 ```
 
-Replay is a **scripted development check**, not live AI inference. It exercises
-a rejected path, an incomplete repair, rollback, and a verified repair. Each run
-retains `state.json`, `events.jsonl`, a working copy, and `report.md` under `.runs/`.
-Resume a bounded/interrupted run with `--resume PATH --mode replay` (or its original
-live mode). The original fixture and its tests remain unchanged.
+The second command evaluates all three cases. Its worker fault is one **controlled
+CI-worker outage**, not a model-authored code defect. It reloads a checkpoint in
+a new instance, then independently rechecks the final source in a fresh process.
+This is an intentional interruption, not a claim that a real process crashed.
+Every case, including a failed run, stays in the evaluation receipt.
 
-## Live model and partner tracing
+The default CLI model is `gemini-3.1-pro-high`; `AGY_MODEL` selects another
+installed model. Only task-relevant synthetic source/tests enter the model
+conversation. CLI tools are prohibited by the prompt and audited afterward;
+this audit cannot prevent a tool that the provider already executed. The CLI
+process is not an OS sandbox. No bypass permissions are supplied by this app.
 
-Use the event's [model access page](https://neatlogs.com/hackathon/models) after
-registration and web check-in. Copy `config.example.json` to the Git-ignored
-`config.private.json`, then put your keys in that private file. Environment
-variables take precedence. The app does not load `.env` files.
+For the organizer's OpenAI-compatible gateway, copy `config.example.json` to
+Git-ignored `config.private.json`. Configure keys privately:
 
-- `LITELLM_API_KEY`: private hackathon key; base URL is already configured.
-- `NEATLOGS_API_KEY`: your neatlogs project key.
-- `MODEL_NAME`: defaults to `claude-haiku`; change to an event-supported model if needed.
-- `MODEL_BASE_URL`: defaults to the organizer's OpenAI-compatible gateway.
+- `LITELLM_API_KEY`: event model key after registered-team check-in.
+- `NEATLOGS_API_KEY`: actual neatlogs project ingest key.
+- `MODEL_NAME`: default `claude-haiku`.
+- `MODEL_BASE_URL`: organizer gateway already configured.
 
-```powershell
-.venv/Scripts/python.exe -m neatlogs doctor --local --json
-.venv/Scripts/python.exe -m neatlogs doctor --probe --json
-.venv/Scripts/python.exe agent.py --mode live
-```
+Environment variables take precedence; the app does not load `.env` files.
+Then run `agent.py --mode live --case backoff`. Local telemetry spans alone do
+not prove exported dashboard traces. See the [event access page](https://neatlogs.com/hackathon/models).
 
-If you already have the Antigravity CLI installed and signed in, real inference
-can also run without waiting for the event key:
+## Verification that survives a bad patch
 
-```powershell
-.venv/Scripts/python.exe agent.py --mode agy
-```
+- Only the case's source file is editable. Signature, defaults and tests stay fixed.
+- Arithmetic AST guards reject imports, attributes, arbitrary calls and loops.
+- Tests compile the exact source snapshot in a fresh isolated Python process;
+  old bytecode cannot produce a false green result.
+- Source and immutable test bytes are checked before execution. The verified
+  source hash must match at finish. Completed runs are rechecked on resume.
+- A pending action saves its prior source before mutation. Restart restores an
+  interrupted action and supplies the model with a matching observation.
 
-This uses the signed-in CLI as a structured inference endpoint, with captured
-token usage and no built-in tool execution or permission bypass. The application
-executes and verifies each returned action. Defaults to `gemini-3.1-pro-high`;
-`AGY_MODEL` can select another installed model. CLI cost is not reported.
+The checks reproduce stale-bytecode false success, changed defaults, source
+drift, test tampering, interrupted writes, and provider tool-message contracts.
+The loop is bounded to 12 decisions by default (CLI maximum 20), with a 10-second
+test timeout. One process should own a run at a time; concurrent resumes need a
+run lock before extending this demo. Arbitrary code execution requires a real
+OS sandbox and resource limits first.
 
-Live mode uses actual model tool calls and the wrapped OpenAI client. Neatlogs
-spans cover the workflow, tools, verification, and provider calls. Without a
-neatlogs key, SDK spans are created locally but **no dashboard export is proven**.
-The fixed synthetic fixture is the only code sent to the model or telemetry.
-Keys, `.runs/`, and tools are excluded from Git. Save a sanitized dashboard trace
-link/screenshot after a real run; configuration alone is not partner evidence.
+## Evidence and contest status
 
-## Entire
+The historical October 10 [real model run](evidence/first-model-run.md) improved
+the original fixture from **4/12 to 12/12** in four decisions. That run had no
+failed candidate; it is not recovery evidence. New evaluation evidence is
+generated by `evaluate.py` and is published only after actual verification.
 
-The local official CLI is `.tools/entire.exe`; its downloaded archive was checked
-against the release checksum. Setup/evidence details are recorded in `hackathon.md`.
-Use Entire Graph to inspect relationships and change impact during development.
-Do not claim a checkpoint or graph result until the command actually succeeds.
+| Required partner or step | Verified status |
+|---|---|
+| neatlogs | SDK 1.4.26 local Doctor passed; remote workflow export/readback pending |
+| Entire | Official CLI/Graph installed; actual Graph retrieval used during development; [receipt](evidence/entire-graph-search.json) |
+| cfo.ai | Actual account/output pending; [prepared input](business-plan-input.md) is not a cfo.ai output |
+| Public code | This repository with fresh event-dated commits |
+| Registration | Luma currently closed; organizer routing request sent October 11; approval pending |
+| Final entry | Not submitted; partner evidence, eligible registration, final demo and quote post pending |
 
-## Current boundaries
+The supported browser inventory is empty and the native computer-use pipe is
+unavailable in this session. No account or subscription action is claimed.
+The published submission window opens October 12 at 6:30 AM PDT, with a planned
+11:25 AM close; the final cutoff is confirmed on Discord. [Official rules](https://neatlogs.com/hackathon)
 
-- The editable source is one arithmetic function. AST validation disallows imports,
-  attributes, arbitrary calls, loops and test edits. This is **not an OS sandbox**
-  for executing arbitrary repositories; general repair requires a sandbox first.
-- The model loop is capped at 12 decisions by default (hard maximum 20); tests have
-  a 10-second timeout. A fixture report measures this fixture only.
-- Registration, live model access, dashboard trace readback, cfo.ai business plan,
-  public repository, build-in-public posts and demo video are pending.
-
-See [hackathon.md](hackathon.md) for the build log and submission checklist.
-
-
-## Verified first milestone — October 10
-
-A real Gemini 3.1 Pro High run finished in four decisions, improving the unchanged
-synthetic fixture from 4/12 to 12/12 checks. See [report](evidence/first-model-run.md)
-and [receipt](evidence/first-model-run.json). The runnable regression check and
-Neatlogs Doctor local diagnostic passed. Entire Graph search output is retained
-under evidence/. Live neatlogs dashboard export and cfo.ai usage are pending.
+See [build log and checklist](hackathon.md) and the [viewer behavior contract](design.md).

@@ -1,0 +1,7 @@
+{
+  "source": "pagination.py",
+  "function": "next_offset",
+  "parameters": ["offset", "page_size", "total"],
+  "defaults": [100, 1000],
+  "goal": "Repair next_offset(offset, page_size=100, total=1000). Reject offset < 0, page_size <= 0, or total < 0 with ValueError before computing a result. Return None when offset >= total; otherwise return min(offset + page_size, total). Preserve the signature and defaults. This is a declared synthetic arithmetic pagination task."
+}

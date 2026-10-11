@@ -9,6 +9,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from uuid import uuid4
 
@@ -16,12 +17,35 @@ import neatlogs
 
 ROOT = Path(__file__).resolve().parent
 SOURCE = 'backoff.py'
+DEFAULT_CONTRACT = {'source': SOURCE, 'function': 'retry_delay', 'parameters': ['attempt', 'base', 'cap'],
+                    'defaults': [1, 30], 'goal': 'Fix bounded exponential retry delays, including invalid inputs; preserve the signature and defaults.'}
+CASES = ('backoff', 'pagination', 'budget')
 CONFIG_KEYS = {'LITELLM_API_KEY', 'NEATLOGS_API_KEY', 'MODEL_BASE_URL', 'MODEL_NAME', 'AGY_MODEL'}
 CORRECT_SOURCE = '''def retry_delay(attempt, base=1, cap=30):
     """Return the bounded delay for a zero-based retry attempt."""
     if attempt < 0 or base <= 0 or cap <= 0:
         raise ValueError("attempt must be nonnegative; base and cap must be positive")
     return min(base * 2 ** attempt, cap)
+'''
+REFERENCE_SOURCES = {'backoff': CORRECT_SOURCE,
+    'pagination': '''def next_offset(offset, page_size=100, total=1000):
+    if offset < 0 or page_size <= 0 or total < 0:
+        raise ValueError("invalid pagination parameters")
+    if offset >= total:
+        return None
+    return min(offset + page_size, total)
+''', 'budget': '''def available_budget(limit, spent=0, reserved=0):
+    if limit < 0 or spent < 0 or reserved < 0:
+        raise ValueError("budget parameters must be nonnegative")
+    return max(limit - spent - reserved, 0)
+'''}
+FIXTURE_HARNESS = '''import json, sys, types
+contract = json.load(sys.stdin)
+module = types.ModuleType(contract["module"])
+module.__file__ = contract["source_name"]
+exec(compile(contract["source"], contract["source_name"], "exec"), module.__dict__)
+sys.modules[contract["module"]] = module
+exec(compile(contract["tests"], "test_case.py", "exec"), {"__name__": "__main__", "__file__": "test_case.py"})
 '''
 
 def digest(text):
@@ -44,18 +68,25 @@ def load_config():
             if value:
                 os.environ.setdefault(name, value)
 
-def validate_source(source):
+def validate_source(source, contract=None):
     """Arithmetic-only AST boundary. General repository repair needs an OS sandbox."""
+    contract = DEFAULT_CONTRACT if contract is None else contract
     if not isinstance(source, str) or len(source) > 10000:
         raise ValueError('Replacement must be at most 10,000 characters')
     tree = ast.parse(source)
     if len(tree.body) != 1 or not isinstance(tree.body[0], ast.FunctionDef):
-        raise ValueError('Only the retry_delay function may be defined')
+        raise ValueError('Only the contracted function may be defined')
     function = tree.body[0]
-    if function.name != 'retry_delay' or function.decorator_list:
+    if function.name != contract['function'] or function.decorator_list:
         raise ValueError('Function name and undecorated shape are fixed')
-    if [arg.arg for arg in function.args.args] != ['attempt', 'base', 'cap'] or function.args.vararg or function.args.kwarg:
+    if ([arg.arg for arg in function.args.args] != contract['parameters'] or function.args.vararg
+            or function.args.kwarg or function.args.posonlyargs or function.args.kwonlyargs
+            or function.returns or any(arg.annotation for arg in function.args.args)):
         raise ValueError('Keep the original function parameters')
+    if (len(function.args.defaults) != len(contract['defaults']) or any(not isinstance(value, ast.Constant)
+            or type(value.value) is not type(expected) or value.value != expected
+            for value, expected in zip(function.args.defaults, contract['defaults']))):
+        raise ValueError('Keep the original function defaults')
     allowed = (ast.Module, ast.FunctionDef, ast.arguments, ast.arg, ast.Return, ast.If, ast.Raise,
                ast.Expr, ast.Constant, ast.Name, ast.Load, ast.BinOp, ast.BoolOp, ast.UnaryOp,
                ast.Compare, ast.Call, ast.Add, ast.Sub, ast.Mult, ast.Div, ast.FloorDiv,
@@ -64,13 +95,15 @@ def validate_source(source):
     for node in ast.walk(tree):
         if not isinstance(node, allowed):
             raise ValueError(f'Unsupported syntax: {type(node).__name__}')
-        if isinstance(node, ast.Name) and node.id not in {'attempt', 'base', 'cap', 'min', 'max', 'ValueError'}:
+        if isinstance(node, ast.Name) and node.id not in set(contract['parameters']) | {'min', 'max', 'ValueError'}:
             raise ValueError('Only arithmetic parameters and allowed builtins may be referenced')
         if isinstance(node, ast.Call) and (not isinstance(node.func, ast.Name) or node.func.id not in {'min', 'max', 'ValueError'}):
             raise ValueError('Only min, max and ValueError calls are allowed')
 
 class RepairRun:
-    def __init__(self, mode, resume=None):
+    def __init__(self, mode, resume=None, case=None):
+        if mode not in {'replay', 'agy', 'live'}:
+            raise ValueError('Unknown run mode')
         runs = ROOT / '.runs'
         runs.mkdir(exist_ok=True)
         if resume:
@@ -80,40 +113,105 @@ class RepairRun:
             self.state = json.loads((self.directory / 'state.json').read_text(encoding='utf8'))
             if self.state['mode'] != mode:
                 raise ValueError('Resume mode must match the original run')
+            saved_case = self.state.get('case', 'backoff')
+            if case is not None and case != saved_case:
+                raise ValueError('Resume case must match the original run')
+            case = saved_case
+        else:
+            case = case or 'backoff'
+        if case not in CASES:
+            raise ValueError('Choose a fixed, trusted fixture case')
+        fixture = ROOT / 'fixtures' / case
+        self.contract = DEFAULT_CONTRACT.copy() if case == 'backoff' else json.loads((fixture / 'contract.json').read_text(encoding='utf8'))
+        if (set(self.contract) != {'source', 'function', 'parameters', 'defaults', 'goal'}
+                or not isinstance(self.contract['source'], str) or Path(self.contract['source']).name != self.contract['source']
+                or not self.contract['source'].endswith('.py') or not isinstance(self.contract['function'], str) or not self.contract['function'].isidentifier()
+                or not isinstance(self.contract['parameters'], list) or not all(isinstance(p, str) and p.isidentifier() for p in self.contract['parameters'])
+                or not isinstance(self.contract['defaults'], list) or len(self.contract['defaults']) > len(self.contract['parameters'])
+                or not isinstance(self.contract['goal'], str)):
+            raise ValueError('Invalid trusted fixture contract')
+        self.source = self.contract['source']
+        contract_hash = digest(json.dumps(self.contract, sort_keys=True))
+        if resume:
+            if self.state.get('contract_sha256', contract_hash) != contract_hash:
+                raise ValueError('Trusted fixture contract changed since the run started')
         else:
             self.directory = runs / (datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ-') + uuid4().hex[:8])
             self.directory.mkdir()
-            shutil.copytree(ROOT / 'fixtures/backoff', self.directory / 'workspace')
+            shutil.copytree(fixture, self.directory / 'workspace')
             self.state = {'mode': mode, 'step': 0, 'status': 'running', 'verified_hash': None,
                           'rollback': None, 'messages': [], 'started_utc': datetime.now(timezone.utc).isoformat()}
+        self.state['case'] = case
+        self.state['contract_sha256'] = contract_hash
         self.workspace = self.directory / 'workspace'
-        if self.workspace.is_symlink() or (self.workspace / SOURCE).is_symlink():
+        if self.workspace.is_symlink() or (self.workspace / self.source).is_symlink():
             raise ValueError('Workspace and source cannot be symlinks')
-        trusted = (ROOT / 'fixtures/backoff/test_case.py').read_bytes()
-        if (self.workspace / 'test_case.py').read_bytes() != trusted:
+        self.trusted_tests = (fixture / 'test_case.py').read_bytes()
+        test_hash = hashlib.sha256(self.trusted_tests).hexdigest()
+        if self.state.get('test_sha256', test_hash) != test_hash:
+            raise ValueError('Trusted tests changed since the run started')
+        self.state['test_sha256'] = test_hash
+        if (self.workspace / 'test_case.py').read_bytes() != self.trusted_tests:
             raise ValueError('Fixture verification contract was changed')
+        pending = self.state.pop('pending_action', None)
+        if pending is not None:
+            if pending['source_before'] is not None:
+                self.replace_file(pending['source_before'])
+            self.state['rollback'] = pending['rollback_before']
+            self.state['verified_hash'] = pending['verified_hash_before']
+            self.state['status'] = 'running'
+            if self.state['mode'] == 'replay':
+                self.state['step'] = max(0, self.state['step'] - 1)
+            result = {'error': 'Interrupted action was rolled back before resuming', 'recovered_interruption': True}
+            self.observation(pending['tool_call_id'], result)
+            self.event('interrupted_action', result, 0)
         self.save()
 
     def save(self):
         write_json(self.directory / 'state.json', self.state)
 
+    def replace_file(self, content):
+        source = self.workspace / self.source
+        temporary = source.with_suffix('.tmp')
+        temporary.write_text(content, encoding='utf8')
+        os.replace(temporary, source)
+
+    def observation(self, tool_call_id, result):
+        if tool_call_id is not None:
+            self.state['messages'].append({'role': 'tool', 'tool_call_id': tool_call_id, 'content': json.dumps(result)})
+        elif self.state['mode'] == 'agy':
+            self.state['messages'].append({'role': 'user', 'content': 'Action observation: ' + json.dumps(result)})
+
     def event(self, name, result, duration):
         record = {'time_utc': datetime.now(timezone.utc).isoformat(), 'step': self.state['step'],
                   'name': name, 'duration_seconds': round(duration, 4), 'result': result}
-        with (self.directory / 'events.jsonl').open('a', encoding='utf8') as stream:
-            stream.write(json.dumps(record) + '\n')
+        path = self.directory / 'events.jsonl'
+        content = path.read_text(encoding='utf8') if path.exists() else ''
+        # Atomic rewrites are O(n) in this <=20-decision demo; a longer-running agent needs a transactional journal.
+        temporary = path.with_suffix('.tmp')
+        temporary.write_text(content + json.dumps(record) + '\n', encoding='utf8')
+        os.replace(temporary, path)
         self.save()
 
     @neatlogs.span(kind='TOOL', tool_name='run_fixture_tests', capture_input=False)
     def tests(self):
         # Only this fresh, trusted arithmetic fixture is executable. No arbitrary repo commands.
+        if self.workspace.is_symlink() or (self.workspace / self.source).is_symlink():
+            raise ValueError('Workspace and source cannot be symlinks')
+        source = (self.workspace / self.source).read_text(encoding='utf8')
+        validate_source(source, self.contract)
+        tests = (self.workspace / 'test_case.py').read_bytes()
+        if tests != self.trusted_tests:
+            raise ValueError('Fixture verification contract was changed')
         environment = {name: value for name, value in os.environ.items() if name not in CONFIG_KEYS}
         options = {'creationflags': subprocess.CREATE_NO_WINDOW} if os.name == 'nt' else {}
         try:
-            process = subprocess.run([sys.executable, 'test_case.py'], cwd=self.workspace,
-                                     env=environment, capture_output=True, timeout=10, **options)
-            return {'exit_code': process.returncode, 'stdout': process.stdout.decode('utf8', errors='replace'),
-                    'stderr': process.stderr.decode('utf8', errors='replace')}
+            process = subprocess.run([sys.executable, '-I', '-B', '-c', FIXTURE_HARNESS], cwd=self.workspace,
+                                     input=json.dumps({'source': source, 'tests': tests.decode('utf8'),
+                                                      'source_name': self.source, 'module': Path(self.source).stem}),
+                                     text=True, encoding='utf8', env=environment, capture_output=True, timeout=10, **options)
+            return {'exit_code': process.returncode, 'stdout': process.stdout, 'stderr': process.stderr,
+                    'source_sha256': digest(source)}
         except subprocess.TimeoutExpired:
             return {'exit_code': 124, 'stdout': '', 'stderr': 'Fixed fixture test exceeded its 10-second limit'}
 
@@ -121,23 +219,21 @@ class RepairRun:
     def action(self, name, arguments):
         if not isinstance(arguments, dict):
             raise ValueError('Tool arguments must be a JSON object')
-        source = self.workspace / SOURCE
+        source = self.workspace / self.source
         if name == 'inspect':
             if arguments:
                 raise ValueError('inspect takes no arguments')
             return {'source': source.read_text(encoding='utf8'),
                     'tests': (self.workspace / 'test_case.py').read_text(encoding='utf8')}
         if name == 'replace_source':
-            if set(arguments) != {'path', 'content', 'reason'} or arguments['path'] != SOURCE:
-                raise ValueError('Only backoff.py can be replaced; path, content and reason are required')
+            if set(arguments) != {'path', 'content', 'reason'} or arguments['path'] != self.source:
+                raise ValueError('Only the contracted source can be replaced; path, content and reason are required')
             if not isinstance(arguments['reason'], str) or len(arguments['reason']) > 2000:
                 raise ValueError('Provide a short repair reason')
-            validate_source(arguments['content'])
+            validate_source(arguments['content'], self.contract)
             if self.state['rollback'] is None:
                 self.state['rollback'] = source.read_text(encoding='utf8')
-            temporary = source.with_suffix('.tmp')
-            temporary.write_text(arguments['content'], encoding='utf8')
-            os.replace(temporary, source)
+            self.replace_file(arguments['content'])
             self.state['verified_hash'] = None
             return {'applied': True, 'sha256': digest(arguments['content']), 'reason': arguments['reason']}
         if name == 'verify':
@@ -145,10 +241,12 @@ class RepairRun:
                 raise ValueError('verify takes no arguments')
             result = self.tests()
             if result['exit_code'] == 0:
-                self.state['verified_hash'] = digest(source.read_text(encoding='utf8'))
+                if result['source_sha256'] != digest(source.read_text(encoding='utf8')):
+                    raise ValueError('Source changed while verification was running')
+                self.state['verified_hash'] = result['source_sha256']
                 self.state['rollback'] = None
             elif self.state['rollback'] is not None:
-                source.write_text(self.state['rollback'], encoding='utf8')
+                self.replace_file(self.state['rollback'])
                 self.state['rollback'] = None
                 self.state['verified_hash'] = None
                 result['reverted_failed_candidate'] = True
@@ -156,6 +254,8 @@ class RepairRun:
         if name == 'finish':
             if set(arguments) != {'summary'} or not isinstance(arguments['summary'], str):
                 raise ValueError('finish requires a string summary')
+            if (self.workspace / 'test_case.py').read_bytes() != self.trusted_tests:
+                raise ValueError('Fixture verification contract was changed')
             if self.state['verified_hash'] != digest(source.read_text(encoding='utf8')):
                 raise ValueError('A passing verification of the current source is required before finish')
             self.state['status'] = 'verified'
@@ -163,17 +263,25 @@ class RepairRun:
             return {'status': 'verified', 'summary': self.state['summary']}
         raise ValueError('Unknown tool')
 
-    def execute(self, name, arguments):
+    def execute(self, name, arguments, tool_call_id=None):
         started = time.monotonic()
+        if self.state['mode'] == 'agy':
+            self.state['messages'].append({'role': 'assistant', 'content': json.dumps({'name': name, 'arguments': arguments})})
+        self.state['pending_action'] = {'name': name, 'tool_call_id': tool_call_id,
+            'source_before': (self.workspace / self.source).read_text(encoding='utf8') if name in {'replace_source', 'verify'} else None,
+            'rollback_before': self.state['rollback'], 'verified_hash_before': self.state['verified_hash']}
+        self.save()
         try:
             result = self.action(name, arguments)
         except (ValueError, SyntaxError) as error:
             result = {'error': str(error)}
+        self.observation(tool_call_id, result)
+        self.state.pop('pending_action')
         self.event(name, result, time.monotonic() - started)
         return result
 
     def choose_agy(self):
-        """Use the existing signed-in CLI only as a structured model endpoint."""
+        """Request structured inference and audit tool events after the CLI has run; this is not isolation."""
         executable = shutil.which('agy') or str(Path.home() / 'AppData/Local/agy/bin/agy.exe')
         if not Path(executable).is_file():
             raise ValueError('Antigravity CLI is not installed or on PATH')
@@ -188,12 +296,15 @@ class RepairRun:
         message = json.dumps({'event': 'user', 'message': {'content': prompt}}) + '\n'
         model = os.getenv('AGY_MODEL', 'gemini-3.1-pro-high')
         command = [executable, '--model', model, '--input-format', 'stream-json', '--output-format', 'stream-json',
-                   '--json-schema', str(schema_path), '--disable-slash-commands', '--print-timeout', '90s']
+                   '--mode', 'plan', '--json-schema', str(schema_path), '--disable-slash-commands', '--print-timeout', '90s']
         options = {'creationflags': subprocess.CREATE_NO_WINDOW} if os.name == 'nt' else {}
         with neatlogs.trace('choose-repair-action', kind='LLM') as span:
             span.set_attribute('llm.model_name', model)
-            process = subprocess.run(command, input=message, text=True, encoding='utf8', capture_output=True,
-                                     cwd=provider, timeout=105, **options)
+            # An empty cwd outside the repo avoids loading coding-agent/project
+            # instructions into this inference-only request; this is not isolation.
+            with tempfile.TemporaryDirectory(prefix='proofpatch-inference-') as isolated_context:
+                process = subprocess.run(command, input=message, text=True, encoding='utf8', capture_output=True,
+                                         cwd=isolated_context, timeout=105, **options)
             (provider / f'decision-{self.state["step"]}.ndjson').write_text(process.stdout, encoding='utf8')
             (provider / f'decision-{self.state["step"]}.stderr').write_text(process.stderr, encoding='utf8')
             events = [json.loads(line) for line in process.stdout.splitlines() if line.strip()]
@@ -201,11 +312,14 @@ class RepairRun:
             if process.returncode or len(results) != 1 or results[0].get('status') != 'SUCCESS':
                 raise ValueError('CLI inference did not succeed; no repair action was executed')
             result = results[0]
+            if not result.get('structured_output') and not result.get('response', '').strip():
+                raise TimeoutError('CLI returned an empty partial result; no action was executed')
             action = result.get('structured_output') or json.loads(result['response'])
             if set(action) != {'name', 'arguments'} or not isinstance(action['name'], str) or not isinstance(action['arguments'], dict):
                 raise ValueError('CLI returned an invalid repair action')
             # The CLI sometimes emits its schema-only finish operation. Accept only
-            # an exact match to final structured output; all environment tools fail closed.
+            # an exact match to final structured output. This audit rejects the repair
+            # action; it cannot prevent an environment tool the CLI already executed.
             for event in events:
                 step = event.get('step_update', {})
                 if step.get('step_type') == 'tool' and not (
@@ -223,23 +337,42 @@ class RepairRun:
 
     @neatlogs.span(kind='WORKFLOW', name='ci-repair', capture_input=False, capture_output=False)
     def run(self, max_steps=12):
+        if not isinstance(max_steps, int) or not 1 <= max_steps <= 20:
+            raise ValueError('A run is bounded to 1..20 model decisions')
         if self.state['status'] == 'verified':
-            return self.state
+            previous_hash = self.state['verified_hash']
+            self.state['status'] = 'running'
+            self.state['verified_hash'] = None
+            self.save()
+            result = self.tests()
+            if result['exit_code'] == 0 and result['source_sha256'] == previous_hash:
+                self.state['status'] = 'verified'
+                self.state['verified_hash'] = previous_hash
+            else:
+                self.state.pop('summary', None)
+                self.state['messages'].append({'role': 'user', 'content': 'Previous verification was invalidated. Current verification: ' + json.dumps(result)})
+            self.event('resume_verification', result, 0)
+            if self.state['status'] == 'verified':
+                self.report()
+                return self.state
         if not self.state['messages']:
             baseline = self.tests()
             self.event('baseline', baseline, 0)
             self.state['baseline'] = baseline
             self.state['messages'] = [
-                {'role': 'system', 'content': 'Repair a trusted local retry-delay fixture. Inspect source and tests, replace only backoff.py, verify the result, recover from rejected edits or failing tests, then finish. Tests are immutable. Source allows only retry_delay(attempt, base=1, cap=30), arithmetic, if/return/raise, min/max/ValueError; no imports, attributes, assignments or loops. Verify rejects and rolls back failed candidates. Do not claim success without passing tests.'},
-                {'role': 'user', 'content': 'Fix the failing retry-delay checks. Baseline: ' + json.dumps(baseline)}]
+                {'role': 'system', 'content': 'Repair one trusted local arithmetic policy. Inspect source and tests, replace only ' + self.source + ', verify the result, recover from rejected edits or failing tests, then finish. Tests and the function signature/defaults are immutable. Source allows arithmetic, if/return/raise, min/max/ValueError; no imports, attributes, assignments or loops. Verify rejects and rolls back failed candidates. Do not claim success without passing tests. Trusted contract: ' + json.dumps(self.contract)},
+                {'role': 'user', 'content': self.contract['goal'] + ' Baseline: ' + json.dumps(baseline)}]
         if self.state['mode'] == 'replay':
             # A deterministic development check, explicitly not an LLM evaluation or AI demo.
+            reference = REFERENCE_SOURCES[self.state['case']]
+            incomplete = ('def retry_delay(attempt, base=1, cap=30):\n    return min(base * 2 ** attempt, cap)\n'
+                          if self.state['case'] == 'backoff' else reference[:reference.index('\n')] + '\n    return 0\n')
             sequence = [('inspect', {}),
-                        ('replace_source', {'path': '../test_case.py', 'content': CORRECT_SOURCE, 'reason': 'Exercise rejected path recovery'}),
-                        ('replace_source', {'path': SOURCE, 'content': 'def retry_delay(attempt, base=1, cap=30):\n    return min(base * 2 ** attempt, cap)\n', 'reason': 'Exercise a semantically incomplete candidate'}),
+                        ('replace_source', {'path': '../test_case.py', 'content': reference, 'reason': 'Exercise rejected path recovery'}),
+                        ('replace_source', {'path': self.source, 'content': incomplete, 'reason': 'Exercise a semantically incomplete candidate'}),
                         ('verify', {}),
-                        ('replace_source', {'path': SOURCE, 'content': CORRECT_SOURCE, 'reason': 'Enforce positive parameters and cap exponential delays'}),
-                        ('verify', {}), ('finish', {'summary': 'Verified bounded exponential retry delays and invalid-input errors.'})]
+                        ('replace_source', {'path': self.source, 'content': reference, 'reason': 'Implement the trusted policy contract'}),
+                        ('verify', {}), ('finish', {'summary': 'Verified the trusted policy and invalid-input errors.'})]
             for name, args in sequence[self.state['step']:max_steps]:
                 self.state['step'] += 1
                 self.execute(name, args)
@@ -250,8 +383,6 @@ class RepairRun:
                 action = self.choose_agy()
                 self.state['step'] += 1
                 result = self.execute(action['name'], action['arguments'])
-                self.state['messages'].append({'role': 'assistant', 'content': json.dumps(action)})
-                self.state['messages'].append({'role': 'user', 'content': 'Action observation: ' + json.dumps(result)})
                 self.save()
         else:
             from openai import OpenAI
@@ -266,14 +397,19 @@ class RepairRun:
                 calls = message.tool_calls or []
                 if not calls:
                     self.state['messages'].append({'role': 'user', 'content': 'Use the tools. A passing verify and finish are required.'})
+                if len(calls) > 1:
+                    for call in calls:
+                        self.observation(call.id, {'error': 'Choose exactly one tool action per decision'})
+                    self.save()
+                    continue
                 for call in calls:
                     try:
                         args = json.loads(call.function.arguments)
-                        result = self.execute(call.function.name, args)
+                        result = self.execute(call.function.name, args, call.id)
                     except json.JSONDecodeError:
                         result = {'error': 'Tool arguments were not valid JSON'}
+                        self.observation(call.id, result)
                         self.event('invalid_tool_arguments', result, 0)
-                    self.state['messages'].append({'role': 'tool', 'tool_call_id': call.id, 'content': json.dumps(result)})
                 self.save()
         if self.state['status'] != 'verified':
             self.state['status'] = 'step_limit'
@@ -284,9 +420,11 @@ class RepairRun:
     def report(self):
         events = [json.loads(line) for line in (self.directory / 'events.jsonl').read_text(encoding='utf8').splitlines()]
         before = self.state['baseline']['stdout'].strip().replace('\r\n', '\n')
-        verifications = [event['result'] for event in events if event['name'] == 'verify']
+        verifications = [event['result'] for event in events if event['name'] in {'verify', 'resume_verification'} and 'stdout' in event['result']]
         after = verifications[-1]['stdout'].strip().replace('\r\n', '\n') if verifications else 'Not verified'
-        content = f'# CI recovery run\n\nMode: **{self.state["mode"]}**. Status: **{self.state["status"]}**.\n\n'
+        if self.state['status'] != 'verified':
+            after = 'No current verified completion. Latest verification observation:\n' + after
+        content = f'# ProofPatch recovery run\n\nCase: **{self.state["case"]}**. Mode: **{self.state["mode"]}**. Status: **{self.state["status"]}**.\n\n'
         if self.state['mode'] == 'replay':
             content += 'Scripted development replay; no live model inference.\n\n'
         content += f'## Before\n\n```text\n{before}\n```\n\n## After\n\n```text\n{after}\n```\n\n'
@@ -307,6 +445,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--mode', choices=['replay', 'live', 'agy'], default='replay')
     parser.add_argument('--resume', type=Path)
+    parser.add_argument('--case', choices=CASES)
     parser.add_argument('--max-steps', type=int, default=12)
     args = parser.parse_args()
     if not 1 <= args.max_steps <= 20:
@@ -317,7 +456,7 @@ def main():
     neatlogs.init(workflow_name='neathack-ci-repair', tags=['neatHack', args.mode])
     run = None
     try:
-        run = RepairRun(args.mode, args.resume)
+        run = RepairRun(args.mode, args.resume, args.case)
         state = run.run(args.max_steps)
         print(json.dumps({'mode': args.mode, 'status': state['status'], 'steps': state['step'],
                           'report': str(run.directory / 'report.md'), 'neatlogs_export_configured': bool(os.getenv('NEATLOGS_API_KEY'))}, indent=2))

@@ -1,0 +1,7 @@
+{
+  "source": "budget.py",
+  "function": "available_budget",
+  "parameters": ["limit", "spent", "reserved"],
+  "defaults": [0, 0],
+  "goal": "Repair available_budget(limit, spent=0, reserved=0). Reject negative limit, spent, or reserved with ValueError. Return max(limit - spent - reserved, 0), preserving the signature and defaults. This is a declared synthetic arithmetic task, not a financial recommendation or a real account operation."
+}
